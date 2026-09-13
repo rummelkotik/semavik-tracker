@@ -11,29 +11,36 @@
   --text-main: #e2e8f0;
   --text-muted: #8092a4;
   --primary-accent: #38bdf8;
+  --btn-text: #080d12;
   --badge-green: #10b981;
   --badge-green-bg: rgba(16, 185, 129, 0.16);
   --badge-red: #ef4444;
   --badge-red-bg: rgba(239, 68, 68, 0.16);
+  --logo-bg: #162a3d;
+  --logo-stroke: #38bdf8;
   --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
 }
 
+/* Бело-рыже-желто-красная светлая палитра */
 body.light-theme {
-  --bg-app: #f4f7fa;
+  --bg-app: #fffbf5;              /* Тёплый молочно-белый фон */
   --panel-bg: #ffffff;
-  --card-bg: #ffffff;
-  --card-inner: #f1f5f9;
-  --border-dim: #cbd5e1;
-  --border-card: #d9e2ec;
-  --border-focus: #0284c7;
-  --text-pure: #0f172a;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --primary-accent: #0284c7;
-  --badge-green: #059669;
-  --badge-green-bg: rgba(5, 150, 105, 0.12);
-  --badge-red: #dc2626;
-  --badge-red-bg: rgba(220, 38, 38, 0.12);
+  --card-bg: #ffffff;             /* Чисто белые карточки */
+  --card-inner: #fff3e6;          /* Мягкий персиково-жёлтый подтон */
+  --border-dim: #fed7aa;          /* Тёплая рамка */
+  --border-card: #ffedd5;
+  --border-focus: #f97316;        /* Яркий рыжий */
+  --text-pure: #7c2d12;           /* Глубокий тёплый каштаново-красный */
+  --text-main: #9a3412;           /* Тёмно-рыжий читаемый текст */
+  --text-muted: #c2410c;          /* Приглушённый терракотовый */
+  --primary-accent: #f97316;      /* Насыщенный оранжево-рыжий */
+  --btn-text: #ffffff;            /* Белый текст на рыжих кнопках */
+  --badge-green: #ea580c;         /* Оранжевый статус прогресса */
+  --badge-green-bg: #ffedd5;      /* Желтовато-персиковая плашка */
+  --badge-red: #dc2626;           /* Сочный красный для привеса */
+  --badge-red-bg: #fee2e2;
+  --logo-bg: #ffedd5;             /* Светло-персиковый фон логотипа */
+  --logo-stroke: #ea580c;         /* Огненно-рыжий контур шприца */
 }
 
 * {
@@ -70,11 +77,13 @@ html, body {
 }
 
 .app-logo .logo-bg {
-  fill: #162a3d;
+  fill: var(--logo-bg);
+  transition: fill 0.25s ease;
 }
 
 .app-logo .logo-strokes {
-  stroke: var(--primary-accent);
+  stroke: var(--logo-stroke);
+  transition: stroke 0.25s ease;
 }
 
 .app-title {
@@ -133,7 +142,7 @@ html, body {
 .tab-item.active {
   background: var(--card-bg);
   color: var(--primary-accent);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .tab-pane {
@@ -232,6 +241,10 @@ html, body {
   transition: width 0.3s ease;
 }
 
+body.light-theme .progress-bar {
+  background: linear-gradient(90deg, #f59e0b, #ea580c);
+}
+
 /* ================= ГРАФИК ================= */
 .chart-container {
   background: var(--card-bg);
@@ -263,6 +276,10 @@ html, body {
 }
 
 .entry-row.pending {
+  border-color: rgba(249, 115, 22, 0.35);
+}
+
+body:not(.light-theme) .entry-row.pending {
   border-color: rgba(56, 189, 248, 0.35);
 }
 
@@ -387,7 +404,7 @@ input[type="number"] {
 
 .btn-add-week {
   background: var(--primary-accent);
-  color: #080d12;
+  color: var(--btn-text);
   border: none;
   padding: 12px;
   border-radius: 12px;
@@ -553,9 +570,14 @@ input[type="number"] {
 }
 
 .food-btn.primary {
-  background: linear-gradient(135deg, var(--primary-accent), #0284c7);
-  color: #080d12;
+  background: var(--primary-accent);
+  color: var(--btn-text);
   border: none;
+}
+
+body.light-theme .food-btn.primary {
+  background: linear-gradient(135deg, #f97316, #ef4444) !important;
+  color: #ffffff !important;
 }
 
 .history-title {
@@ -755,7 +777,7 @@ input[type="number"] {
 
 .dialog-btn.primary {
   background: var(--primary-accent);
-  color: #080d12;
+  color: var(--btn-text);
 }
 
 .full-width {

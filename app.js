@@ -327,7 +327,9 @@ function renderChart() {
   const ctx = canvas.getContext("2d");
   if (chartInstance) chartInstance.destroy();
 
-  const lineColor = isLight ? "#0284c7" : "#38bdf8";
+  // Рыже-красный цвет графика для тёплой светлой темы, бирюзовый для тёмной
+  const lineColor = isLight ? "#ea580c" : "#38bdf8";
+  const fillColor = isLight ? "rgba(249, 115, 22, 0.15)" : "rgba(56, 189, 248, 0.12)";
 
   chartInstance = new Chart(ctx, {
     type: "line",
@@ -337,7 +339,7 @@ function renderChart() {
         data: data,
         borderColor: lineColor,
         borderWidth: 2.5,
-        backgroundColor: "rgba(56, 189, 248, 0.12)",
+        backgroundColor: fillColor,
         fill: true,
         tension: 0.3,
         pointBackgroundColor: lineColor,
@@ -356,7 +358,7 @@ function renderChart() {
   });
 }
 
-// ================= ГАРАНТИРОВАННАЯ ОТРИСОВКА НЕДЕЛЬ =================
+// ================= ОТРИСОВКА НЕДЕЛЬ =================
 function renderSchedule() {
   const list = document.getElementById("entryList");
   if (!list) return;
@@ -896,7 +898,7 @@ function render() {
   renderFood();
 }
 
-// Безопасный запуск после загрузки DOM
+// Запуск после загрузки DOM
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
     applyTheme();
