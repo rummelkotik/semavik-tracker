@@ -445,9 +445,10 @@ function renderSchedule() {
     const row = document.createElement("div");
     row.className = `entry-row ${item.done ? "" : "pending"}`;
 
+    // Компактная кнопка: когда отмечено — просто зеленая галочка ✓
     const btnHtml = item.done
-      ? `<button class="action-btn" onclick="toggleWeek(${idx})">✓ ${item.doneTime || "Сделано"}</button>`
-      : `<button class="action-btn uncompleted" onclick="toggleWeek(${idx})">Сделать</button>`;
+      ? `<button class="action-btn completed" onclick="toggleWeek(${idx})" title="Укол сделан">✓</button>`
+      : `<button class="action-btn uncompleted" onclick="toggleWeek(${idx})" title="Отметить укол">Сделать</button>`;
 
     const labelHtml =
       idx === 0
