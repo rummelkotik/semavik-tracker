@@ -1,23 +1,51 @@
 const DAYS = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
+// Встроенный быстрый справочник продуктов (на 100г)
 const BUILTIN_FOOD_DB = [
   { name: "Творог 5%", cals: 121, prot: 16.0, fat: 5.0, carb: 3.0 },
-  { name: "Творог 0%", cals: 71, prot: 16.5, fat: 0.2, carb: 1.3 },
+  { name: "Творог 0% (обезжиренный)", cals: 71, prot: 16.5, fat: 0.2, carb: 1.3 },
   { name: "Творог 9%", cals: 159, prot: 14.0, fat: 9.0, carb: 2.0 },
-  { name: "Яйцо куриное (1 шт)", cals: 143, prot: 12.7, fat: 10.9, carb: 0.7 },
-  { name: "Куриное филе грудка", cals: 110, prot: 23.0, fat: 1.2, carb: 0.0 },
-  { name: "Индейка филе грудки", cals: 115, prot: 24.0, fat: 1.5, carb: 0.0 },
-  { name: "Говядина постная", cals: 180, prot: 26.0, fat: 8.0, carb: 0.0 },
-  { name: "Лосось / Форель", cals: 206, prot: 20.0, fat: 13.0, carb: 0.0 },
-  { name: "Тунец в с/соку", cals: 101, prot: 23.5, fat: 0.8, carb: 0.0 },
-  { name: "Гречка варёная", cals: 105, prot: 4.2, fat: 1.1, carb: 21.3 },
+  { name: "Яйцо куриное (1 шт ~55г)", cals: 143, prot: 12.7, fat: 10.9, carb: 0.7 },
+  { name: "Яичный белок", cals: 44, prot: 11.1, fat: 0.2, carb: 0.7 },
+  { name: "Молоко 2.5%", cals: 52, prot: 2.8, fat: 2.5, carb: 4.7 },
+  { name: "Молоко 3.2%", cals: 59, prot: 2.9, fat: 3.2, carb: 4.7 },
+  { name: "Йогурт греческий Teos 2%", cals: 66, prot: 8.0, fat: 2.0, carb: 4.2 },
+  { name: "Сыр Российский 45%", cals: 350, prot: 24.0, fat: 28.0, carb: 0.0 },
+  { name: "Сыр Моцарелла", cals: 280, prot: 18.0, fat: 22.0, carb: 2.2 },
+  { name: "Сыр Сулугуни", cals: 285, prot: 19.5, fat: 22.0, carb: 0.0 },
+  { name: "Сыр Пармезан", cals: 392, prot: 35.8, fat: 25.8, carb: 3.2 },
+  { name: "Кефир 1%", cals: 40, prot: 3.0, fat: 1.0, carb: 4.0 },
+  { name: "Кефир 2.5%", cals: 53, prot: 2.9, fat: 2.5, carb: 4.0 },
+  { name: "Сметана 15%", cals: 158, prot: 2.6, fat: 15.0, carb: 3.0 },
+  { name: "Масло сливочное 82.5%", cals: 748, prot: 0.6, fat: 82.5, carb: 0.8 },
+  { name: "Куриное филе (грудка варёная / гриль)", cals: 135, prot: 29.0, fat: 2.0, carb: 0.0 },
+  { name: "Куриное филе сырое", cals: 110, prot: 23.0, fat: 1.2, carb: 0.0 },
+  { name: "Куриное бедро без кожи", cals: 170, prot: 20.0, fat: 10.0, carb: 0.0 },
+  { name: "Индейка (филе грудки)", cals: 115, prot: 24.0, fat: 1.5, carb: 0.0 },
+  { name: "Говядина постная отварная", cals: 180, prot: 26.0, fat: 8.0, carb: 0.0 },
+  { name: "Фарш говяжий нежирный", cals: 215, prot: 20.0, fat: 15.0, carb: 0.0 },
+  { name: "Свинина нежирная вырезка", cals: 190, prot: 21.0, fat: 11.0, carb: 0.0 },
+  { name: "Лосось / Форель запечённая", cals: 206, prot: 20.0, fat: 13.0, carb: 0.0 },
+  { name: "Тунец в собственном соку", cals: 101, prot: 23.5, fat: 0.8, carb: 0.0 },
+  { name: "Минтай / Треска филе", cals: 72, prot: 16.0, fat: 0.8, carb: 0.0 },
+  { name: "Креветки варёные", cals: 95, prot: 20.5, fat: 1.5, carb: 0.0 },
+  { name: "Гречка (крупа сухая)", cals: 310, prot: 12.6, fat: 3.3, carb: 62.0 },
+  { name: "Гречка варёная на воде", cals: 105, prot: 4.2, fat: 1.1, carb: 21.3 },
+  { name: "Овсяные хлопья (Геркулес сухой)", cals: 350, prot: 12.0, fat: 6.0, carb: 62.0 },
   { name: "Овсяная каша на воде", cals: 88, prot: 3.0, fat: 1.7, carb: 15.0 },
+  { name: "Рис белый (сухой)", cals: 344, prot: 6.7, fat: 0.7, carb: 78.0 },
   { name: "Рис варёный", cals: 116, prot: 2.5, fat: 0.3, carb: 25.0 },
+  { name: "Макароны тв. сортов (сухие)", cals: 350, prot: 13.0, fat: 1.5, carb: 71.0 },
   { name: "Макароны отварные", cals: 130, prot: 5.0, fat: 0.6, carb: 26.0 },
+  { name: "Картофель отварной", cals: 82, prot: 2.0, fat: 0.4, carb: 17.5 },
+  { name: "Хлеб цельнозерновой", cals: 215, prot: 9.0, fat: 2.0, carb: 40.0 },
+  { name: "Хлеб бородинский / ржаной", cals: 205, prot: 6.8, fat: 1.3, carb: 40.0 },
   { name: "Огурцы свежие", cals: 15, prot: 0.8, fat: 0.1, carb: 3.0 },
   { name: "Помидоры свежие", cals: 20, prot: 0.9, fat: 0.2, carb: 3.9 },
-  { name: "Банан", cals: 89, prot: 1.5, fat: 0.2, carb: 21.8 },
-  { name: "Яблоко", cals: 52, prot: 0.3, fat: 0.2, carb: 13.8 }
+  { name: "Банан (1 шт ~120г)", cals: 89, prot: 1.5, fat: 0.2, carb: 21.8 },
+  { name: "Яблоко", cals: 52, prot: 0.3, fat: 0.2, carb: 13.8 },
+  { name: "Масло оливковое / растительное", cals: 899, prot: 0.0, fat: 99.9, carb: 0.0 },
+  { name: "Протеин сывороточный (1 скуп ~30г)", cals: 380, prot: 75.0, fat: 4.5, carb: 8.0 }
 ];
 
 function formatDate(date) {
@@ -28,14 +56,17 @@ function formatDate(date) {
 
 function getTodayIso() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function generateInitialSchedule() {
   const list = [];
   const baseDate = new Date();
 
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 16; i++) {
     const d = new Date(baseDate);
     d.setDate(baseDate.getDate() + i * 7);
 
@@ -57,57 +88,36 @@ function generateInitialSchedule() {
   return list;
 }
 
-// ================= СОСТОЯНИЕ =================
-let state = [];
-try {
-  const stored = JSON.parse(localStorage.getItem("semavik_life_data_v2"));
-  state = Array.isArray(stored) && stored.length > 0 ? stored : generateInitialSchedule();
-} catch (e) {
-  state = generateInitialSchedule();
-}
-
+// Состояние
+let state = JSON.parse(localStorage.getItem("semavik_life_data_v2")) || generateInitialSchedule();
 let targetWeight = parseFloat(localStorage.getItem("semavik_target_weight")) || null;
 let isLight = localStorage.getItem("semavik_theme") === "light";
 let chartInstance = null;
 
 let foodLog = JSON.parse(localStorage.getItem("semavik_food_log")) || {};
-let foodGoals = JSON.parse(localStorage.getItem("semavik_food_goals")) || { cals: 2100, p: 140, f: 70, c: 200 };
+let foodGoals = JSON.parse(localStorage.getItem("semavik_food_goals")) || {
+  cals: 2100,
+  p: 140,
+  f: 70,
+  c: 200
+};
 let selectedFoodDate = getTodayIso();
 let activeTab = "weight";
 
 let currentPickedProduct = null;
 let searchDebounceTimeout = null;
-let quickAddBase100 = { cals: 0, prot: 0, fat: 0, carb: 0 };
+let quickAddBase100 = null;
 
 // ================= ТЕМА И ВКЛАДКИ =================
 function applyTheme() {
   const themeBtn = document.getElementById("themeBtn");
+  if (!themeBtn) return;
   if (isLight) {
     document.body.classList.add("light-theme");
-    if (themeBtn) {
-      themeBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-      `;
-    }
+    themeBtn.innerText = "🌙";
   } else {
     document.body.classList.remove("light-theme");
-    if (themeBtn) {
-      themeBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-      `;
-    }
+    themeBtn.innerText = "☀️";
   }
 }
 
@@ -124,21 +134,24 @@ function switchTab(tab) {
   const tabBtnF = document.getElementById("tabBtnFood");
   const tabContentW = document.getElementById("tabWeightContent");
   const tabContentF = document.getElementById("tabFoodContent");
+  const bottomBar = document.getElementById("bottomBarWeight");
 
-  if (tabBtnW && tabBtnF && tabContentW && tabContentF) {
-    if (tab === "weight") {
-      tabBtnW.classList.add("active");
-      tabBtnF.classList.remove("active");
-      tabContentW.style.display = "flex";
-      tabContentF.style.display = "none";
-      renderChart();
-    } else {
-      tabBtnF.classList.add("active");
-      tabBtnW.classList.remove("active");
-      tabContentF.style.display = "flex";
-      tabContentW.style.display = "none";
-      renderFood();
-    }
+  if (!tabBtnW || !tabBtnF || !tabContentW || !tabContentF) return;
+
+  if (tab === "weight") {
+    tabBtnW.classList.add("active");
+    tabBtnF.classList.remove("active");
+    tabContentW.style.display = "flex";
+    tabContentF.style.display = "none";
+    if (bottomBar) bottomBar.style.display = "flex";
+    renderChart();
+  } else {
+    tabBtnF.classList.add("active");
+    tabBtnW.classList.remove("active");
+    tabContentF.style.display = "flex";
+    tabContentW.style.display = "none";
+    if (bottomBar) bottomBar.style.display = "none";
+    renderFood();
   }
 }
 
@@ -154,7 +167,7 @@ function save() {
   render();
 }
 
-// ================= РАСПИСАНИЕ И ВЕС =================
+// ================= ТЕРАПИЯ И ВЕС =================
 function changeStartDate(newDateStr) {
   if (!newDateStr) return;
   const [year, month, day] = newDateStr.split("-").map(Number);
@@ -172,19 +185,19 @@ function changeStartDate(newDateStr) {
 function openDateModal() {
   const modal = document.getElementById("dateModal");
   const input = document.getElementById("customDateInput");
-  if (input) input.value = state[0] && state[0].isoDate ? state[0].isoDate.slice(0, 10) : getTodayIso();
-  if (modal) modal.classList.add("active");
+  const current = state[0] && state[0].isoDate ? state[0].isoDate.slice(0, 10) : getTodayIso();
+  input.value = current;
+  modal.classList.add("active");
 }
 
 function closeDateModal() {
-  const modal = document.getElementById("dateModal");
-  if (modal) modal.classList.remove("active");
+  document.getElementById("dateModal").classList.remove("active");
 }
 
 function applyCustomDate() {
-  const input = document.getElementById("customDateInput");
-  if (input && input.value) {
-    changeStartDate(input.value);
+  const val = document.getElementById("customDateInput").value;
+  if (val) {
+    changeStartDate(val);
     closeDateModal();
   }
 }
@@ -192,27 +205,22 @@ function applyCustomDate() {
 function openTargetModal() {
   const modal = document.getElementById("targetModal");
   const input = document.getElementById("customTargetInput");
-  if (input) input.value = targetWeight !== null ? targetWeight : "";
-  if (modal) modal.classList.add("active");
+  input.value = targetWeight !== null ? targetWeight : "";
+  modal.classList.add("active");
 }
 
 function closeTargetModal() {
-  const modal = document.getElementById("targetModal");
-  if (modal) modal.classList.remove("active");
+  document.getElementById("targetModal").classList.remove("active");
 }
 
 function applyCustomTarget() {
-  const input = document.getElementById("customTargetInput");
-  if (input) {
-    const val = input.value;
-    targetWeight = val !== "" && !isNaN(val) ? parseFloat(val) : null;
-    save();
-    closeTargetModal();
-  }
+  const val = document.getElementById("customTargetInput").value;
+  targetWeight = val !== "" && !isNaN(val) ? parseFloat(val) : null;
+  save();
+  closeTargetModal();
 }
 
 function toggleWeek(idx) {
-  if (!state[idx]) return;
   state[idx].done = !state[idx].done;
   if (state[idx].done) {
     const now = new Date();
@@ -226,13 +234,11 @@ function toggleWeek(idx) {
 }
 
 function updateWeight(idx, val) {
-  if (!state[idx]) return;
   state[idx].weight = val !== "" && !isNaN(val) ? parseFloat(val) : null;
   save();
 }
 
 function updateDose(idx, val) {
-  if (!state[idx]) return;
   state[idx].dose = parseFloat(val);
   save();
 }
@@ -265,6 +271,9 @@ function addNewWeek() {
   });
 
   save();
+  setTimeout(() => {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  }, 50);
 }
 
 function renderStats() {
@@ -274,7 +283,7 @@ function renderStats() {
   const dispCurrent = document.getElementById("disp-current");
   const dispTarget = document.getElementById("disp-target");
   const valEl = document.getElementById("disp-diff");
-  const badgeEl = document.getElementById("badgeDiff") || document.querySelector(".metric-card.success") || document.querySelector(".stat-card.highlight");
+  const badgeEl = document.querySelector(".stat-cell.highlight");
   const titleEl = document.getElementById("disp-diff-title");
 
   const progressBox = document.getElementById("progressBox");
@@ -282,17 +291,17 @@ function renderStats() {
   const progressRemaining = document.getElementById("progressRemaining");
   const progressBar = document.getElementById("targetProgressBar");
 
-  if (dispTarget) {
-    dispTarget.innerText = targetWeight !== null ? `${targetWeight} кг` : "Задать";
-  }
+  if (!dispStart) return;
+
+  dispTarget.innerText = targetWeight !== null ? `${targetWeight} кг` : "Задать";
 
   if (recorded.length === 0) {
-    if (dispStart) dispStart.innerText = "—";
-    if (dispCurrent) dispCurrent.innerText = "—";
-    if (valEl) valEl.innerText = "—";
-    if (titleEl) titleEl.innerText = "Сброшено:";
-    if (badgeEl) badgeEl.classList.remove("danger");
-    if (progressBox) progressBox.style.display = "none";
+    dispStart.innerText = "—";
+    dispCurrent.innerText = "—";
+    valEl.innerText = "—";
+    titleEl.innerText = "Сброшено:";
+    badgeEl.classList.remove("danger");
+    progressBox.style.display = "none";
     return;
   }
 
@@ -300,22 +309,20 @@ function renderStats() {
   const currentW = recorded[recorded.length - 1].weight;
   const diff = parseFloat((currentW - startW).toFixed(1));
 
-  if (dispStart) dispStart.innerText = `${startW} кг`;
-  if (dispCurrent) dispCurrent.innerText = `${currentW} кг`;
+  dispStart.innerText = `${startW} кг`;
+  dispCurrent.innerText = `${currentW} кг`;
 
-  if (valEl) {
-    if (diff > 0) {
-      if (badgeEl) badgeEl.classList.add("danger");
-      if (titleEl) titleEl.innerText = "Набрано:";
-      valEl.innerText = `+${diff} кг`;
-    } else {
-      if (badgeEl) badgeEl.classList.remove("danger");
-      if (titleEl) titleEl.innerText = "Сброшено:";
-      valEl.innerText = `${diff} кг`;
-    }
+  if (diff > 0) {
+    badgeEl.classList.add("danger");
+    titleEl.innerText = "Набрано:";
+    valEl.innerText = `+${diff} кг`;
+  } else {
+    badgeEl.classList.remove("danger");
+    titleEl.innerText = "Сброшено:";
+    valEl.innerText = `${diff} кг`;
   }
 
-  if (targetWeight !== null && progressBox) {
+  if (targetWeight !== null) {
     progressBox.style.display = "flex";
     const totalToLose = startW - targetWeight;
 
@@ -325,60 +332,91 @@ function renderStats() {
       percent = Math.max(0, Math.min(100, percent));
       const remaining = parseFloat((currentW - targetWeight).toFixed(1));
       
-      if (progressText) progressText.innerText = `Прогресс: ${percent}%`;
-      if (progressRemaining) progressRemaining.innerText = remaining > 0 ? `Осталось: ${remaining} кг` : `Цель достигнута! 🎉`;
-      if (progressBar) progressBar.style.width = `${percent}%`;
+      progressText.innerText = `Прогресс: ${percent}%`;
+      progressRemaining.innerText = remaining > 0 ? `Осталось: ${remaining} кг` : `Цель достигнута! 🎉`;
+      progressBar.style.width = `${percent}%`;
     } else {
       progressBox.style.display = "none";
     }
-  } else if (progressBox) {
+  } else {
     progressBox.style.display = "none";
   }
 }
 
 function renderChart() {
+  if (activeTab !== "weight") return;
+  const points = state.filter(s => s.weight !== null && !isNaN(s.weight));
+  const labels = points.map(s => `Н${s.week} (${s.weight})`);
+  const data = points.map(s => s.weight);
+
   const canvas = document.getElementById("weightChart");
   if (!canvas) return;
-
-  const points = state.filter(s => s.weight !== null && !isNaN(s.weight));
-  const labels = points.length > 0 ? points.map(s => `Н${s.week}`) : ["Н1"];
-  const data = points.length > 0 ? points.map(s => s.weight) : [null];
-
   const ctx = canvas.getContext("2d");
   if (chartInstance) chartInstance.destroy();
 
-  // Рыже-красный цвет графика для тёплой светлой темы, бирюзовый для тёмной
   const lineColor = isLight ? "#ea580c" : "#38bdf8";
-  const fillColor = isLight ? "rgba(249, 115, 22, 0.15)" : "rgba(56, 189, 248, 0.12)";
+  const tickColor = isLight ? "#9a3412" : "#607282";
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 140);
+  if (isLight) {
+    gradient.addColorStop(0, "rgba(234, 88, 12, 0.22)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0.0)");
+  } else {
+    gradient.addColorStop(0, "rgba(56, 189, 248, 0.28)");
+    gradient.addColorStop(1, "rgba(56, 189, 248, 0.0)");
+  }
+
+  const datasets = [
+    {
+      label: "Вес",
+      data: data,
+      borderColor: lineColor,
+      borderWidth: 2.5,
+      backgroundColor: gradient,
+      fill: true,
+      tension: 0.3,
+      pointBackgroundColor: lineColor,
+      pointBorderColor: isLight ? "#ffffff" : "#121820",
+      pointBorderWidth: 2,
+      pointRadius: 4.5,
+      pointHoverRadius: 6
+    }
+  ];
+
+  if (targetWeight !== null && data.length > 0) {
+    datasets.push({
+      label: "Цель",
+      data: new Array(data.length).fill(targetWeight),
+      borderColor: isLight ? "#dc2626" : "#f43f5e",
+      borderWidth: 1.5,
+      borderDash: [5, 5],
+      pointRadius: 0,
+      fill: false,
+      tension: 0
+    });
+  }
 
   chartInstance = new Chart(ctx, {
     type: "line",
-    data: {
-      labels: labels,
-      datasets: [{
-        data: data,
-        borderColor: lineColor,
-        borderWidth: 2.5,
-        backgroundColor: fillColor,
-        fill: true,
-        tension: 0.3,
-        pointBackgroundColor: lineColor,
-        pointRadius: 4
-      }]
-    },
+    data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: isLight ? "#431407" : "#1e293b",
+          callbacks: { label: c => `${c.dataset.label || "Вес"}: ${c.parsed.y} кг` }
+        }
+      },
       scales: {
-        x: { grid: { display: false } },
-        y: { display: true }
+        x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 9 } } },
+        y: { display: false }
       }
     }
   });
 }
 
-// ================= ОТРИСОВКА НЕДЕЛЬ =================
 function renderSchedule() {
   const list = document.getElementById("entryList");
   if (!list) return;
@@ -392,9 +430,12 @@ function renderSchedule() {
       ? `<button class="action-btn" onclick="toggleWeek(${idx})">✓ ${item.doneTime || "Сделано"}</button>`
       : `<button class="action-btn uncompleted" onclick="toggleWeek(${idx})">Сделать</button>`;
 
-    const labelHtml = idx === 0
-      ? `Неделя 1 <span class="date-edit-wrapper" onclick="openDateModal()">(${item.dateStr})</span>`
-      : `Неделя ${item.week} (${item.dateStr})`;
+    const labelHtml =
+      idx === 0
+        ? `Неделя 1 <span class="date-edit-wrapper" onclick="openDateModal()">
+            <span class="date-display-text">(${item.dateStr})</span>
+           </span>`
+        : `Неделя ${item.week} (${item.dateStr})`;
 
     row.innerHTML = `
       <div class="left-group">
@@ -434,34 +475,32 @@ function changeFoodDate(deltaDays) {
   const [y, m, d] = selectedFoodDate.split("-").map(Number);
   const curDate = new Date(y, m - 1, d);
   curDate.setDate(curDate.getDate() + deltaDays);
-  selectedFoodDate = `${curDate.getFullYear()}-${String(curDate.getMonth() + 1).padStart(2, "0")}-${String(curDate.getDate()).padStart(2, "0")}`;
+
+  const newY = curDate.getFullYear();
+  const newM = String(curDate.getMonth() + 1).padStart(2, "0");
+  const newD = String(curDate.getDate()).padStart(2, "0");
+  selectedFoodDate = `${newY}-${newM}-${newD}`;
+
   renderFood();
 }
 
 function renderFood() {
   const today = getTodayIso();
   const labelEl = document.getElementById("foodDateLabel");
-  if (labelEl) {
-    if (selectedFoodDate === today) {
-      labelEl.innerText = "Сегодня";
-    } else {
-      const [y, m, d] = selectedFoodDate.split("-").map(Number);
-      const dateObj = new Date(y, m - 1, d);
-      labelEl.innerText = `${formatDate(dateObj)}, ${DAYS[dateObj.getDay()]}`;
-    }
+  if (!labelEl) return;
+
+  if (selectedFoodDate === today) {
+    labelEl.innerText = "Сегодня";
+  } else {
+    const [y, m, d] = selectedFoodDate.split("-").map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    labelEl.innerText = `${formatDate(dateObj)}, ${DAYS[dateObj.getDay()]}`;
   }
 
-  const targetCalsEl = document.getElementById("foodTargetCals");
-  if (targetCalsEl) targetCalsEl.innerText = foodGoals.cals;
-
-  const protGoalEl = document.getElementById("foodTargetProtein");
-  if (protGoalEl) protGoalEl.innerText = `/ ${foodGoals.p}г`;
-
-  const fatGoalEl = document.getElementById("foodTargetFat");
-  if (fatGoalEl) fatGoalEl.innerText = `/ ${foodGoals.f}г`;
-
-  const carbsGoalEl = document.getElementById("foodTargetCarbs");
-  if (carbsGoalEl) carbsGoalEl.innerText = `/ ${foodGoals.c}г`;
+  document.getElementById("foodTargetCals").innerText = foodGoals.cals;
+  document.getElementById("foodTargetProtein").innerText = `/ ${foodGoals.p}г`;
+  document.getElementById("foodTargetFat").innerText = `/ ${foodGoals.f}г`;
+  document.getElementById("foodTargetCarbs").innerText = `/ ${foodGoals.c}г`;
 
   const dayEntries = foodLog[selectedFoodDate] || [];
   let totalC = 0, totalP = 0, totalF = 0, totalCarbs = 0;
@@ -473,55 +512,49 @@ function renderFood() {
     totalCarbs += item.c || 0;
   });
 
-  const totalCalsEl = document.getElementById("foodTotalCals");
-  if (totalCalsEl) totalCalsEl.innerText = Math.round(totalC);
+  totalC = Math.round(totalC);
+  totalP = Math.round(totalP);
+  totalF = Math.round(totalF);
+  totalCarbs = Math.round(totalCarbs);
 
-  const totalProtEl = document.getElementById("foodTotalProtein");
-  if (totalProtEl) totalProtEl.innerText = `${Math.round(totalP)}г`;
+  document.getElementById("foodTotalCals").innerText = totalC;
+  document.getElementById("foodTotalProtein").innerText = `${totalP}г`;
+  document.getElementById("foodTotalFat").innerText = `${totalF}г`;
+  document.getElementById("foodTotalCarbs").innerText = `${totalCarbs}г`;
 
-  const totalFatEl = document.getElementById("foodTotalFat");
-  if (totalFatEl) totalFatEl.innerText = `${Math.round(totalF)}г`;
-
-  const totalCarbsEl = document.getElementById("foodTotalCarbs");
-  if (totalCarbsEl) totalCarbsEl.innerText = `${Math.round(totalCarbs)}г`;
-
-  const remain = foodGoals.cals - Math.round(totalC);
+  const remain = foodGoals.cals - totalC;
   const remainEl = document.getElementById("foodRemainCals");
-  if (remainEl) {
-    remainEl.innerText = remain;
-    remainEl.style.color = remain >= 0 ? "var(--badge-green, #10b981)" : "var(--badge-red, #ef4444)";
-  }
+  remainEl.innerText = remain;
+  remainEl.style.color = remain >= 0 ? "var(--green-badge)" : "#dc2626";
 
   const percent = Math.min(100, Math.round((totalC / foodGoals.cals) * 100)) || 0;
   const barEl = document.getElementById("foodCalProgress");
-  if (barEl) barEl.style.width = `${percent}%`;
+  barEl.style.width = `${percent}%`;
+  barEl.style.backgroundColor = totalC > foodGoals.cals ? "#dc2626" : "var(--green-badge)";
 
   const logList = document.getElementById("foodLogList");
-  if (logList) {
-    logList.innerHTML = "";
-    if (dayEntries.length === 0) {
-      logList.innerHTML = `<div style="text-align: center; color: var(--text-muted, #8092a4); font-size: 0.85rem; padding: 20px;">На этот день записей пока нет</div>`;
-      return;
-    }
+  logList.innerHTML = "";
 
-    dayEntries.forEach((item, idx) => {
-      const row = document.createElement("div");
-      row.className = "food-item-row";
-      const weightBadge = (item.grams && !isNaN(item.grams)) ? `${item.grams} г/мл • ` : "";
-
-      row.innerHTML = `
-        <div class="food-item-info">
-          <span class="food-item-name">${item.name}</span>
-          <span class="food-item-sub">${weightBadge}Б: ${item.p}г | Ж: ${item.f}г | У: ${item.c}г</span>
-        </div>
-        <div class="food-item-right">
-          <span class="food-item-cals">${item.cals} ккал</span>
-          <button class="btn-del" onclick="deleteFoodEntry(${idx})">✕</button>
-        </div>
-      `;
-      logList.appendChild(row);
-    });
+  if (dayEntries.length === 0) {
+    logList.innerHTML = `<div style="text-align: center; color: var(--text-sub); font-size: 0.85rem; padding: 20px;">На этот день записей пока нет</div>`;
+    return;
   }
+
+  dayEntries.forEach((item, idx) => {
+    const row = document.createElement("div");
+    row.className = "food-item-row";
+    row.innerHTML = `
+      <div class="food-item-info">
+        <span class="food-item-name">${item.name}</span>
+        <span class="food-item-sub">${item.grams ? item.grams + "г • " : ""}Б: ${item.p}г | Ж: ${item.f}г | У: ${item.c}г</span>
+      </div>
+      <div class="food-item-right">
+        <span class="food-item-cals">${item.cals} ккал</span>
+        <button class="btn-del" onclick="deleteFoodEntry(${idx})">✕</button>
+      </div>
+    `;
+    logList.appendChild(row);
+  });
 }
 
 function deleteFoodEntry(idx) {
@@ -531,89 +564,205 @@ function deleteFoodEntry(idx) {
   renderFood();
 }
 
-// ================= БЫСТРЫЙ ВВОД =================
-function openQuickAddModal(baseData = null) {
-  const modal = document.getElementById("quickAddModal");
-  if (modal) modal.classList.add("active");
-  const gramsEl = document.getElementById("quickAddGrams");
-  const hintEl = document.getElementById("quickAddPer100Hint");
+function openFoodSearchModal() {
+  document.getElementById("foodSearchModal").classList.add("active");
+  document.getElementById("foodSearchQuery").value = "";
+  document.getElementById("searchResultsList").innerHTML = "";
+  document.getElementById("selectedProductBox").style.display = "none";
+  currentPickedProduct = null;
+}
 
-  if (baseData) {
-    quickAddBase100 = {
-      cals: parseFloat(baseData.cals100) || parseFloat(baseData.cals) || 0,
-      prot: parseFloat(baseData.prot100) || parseFloat(baseData.prot) || 0,
-      fat: parseFloat(baseData.fat100) || parseFloat(baseData.fat) || 0,
-      carb: parseFloat(baseData.carb100) || parseFloat(baseData.carb) || 0
-    };
+function closeFoodSearchModal() {
+  document.getElementById("foodSearchModal").classList.remove("active");
+}
 
-    const nameEl = document.getElementById("quickAddName");
-    if (nameEl) nameEl.value = baseData.name || "Продукт с фото";
-    if (gramsEl) gramsEl.value = parseFloat(baseData.detectedWeight) || 100;
+function debounceFoodSearch() {
+  clearTimeout(searchDebounceTimeout);
+  const q = document.getElementById("foodSearchQuery").value.trim().toLowerCase();
+  const container = document.getElementById("searchResultsList");
 
-    if (hintEl) {
-      hintEl.innerText = `База на 100г: ${quickAddBase100.cals} ккал | Б:${quickAddBase100.prot} Ж:${quickAddBase100.fat} У:${quickAddBase100.carb}`;
-    }
-
-    recalcQuickAddPortion();
-  } else {
-    quickAddBase100 = { cals: 0, prot: 0, fat: 0, carb: 0 };
-    const nameEl = document.getElementById("quickAddName");
-    if (nameEl) nameEl.value = "";
-    if (gramsEl) gramsEl.value = "100";
-    const calsEl = document.getElementById("quickAddCals");
-    if (calsEl) calsEl.value = "";
-    const pEl = document.getElementById("quickAddP");
-    if (pEl) pEl.value = "";
-    const fEl = document.getElementById("quickAddF");
-    if (fEl) fEl.value = "";
-    const cEl = document.getElementById("quickAddC");
-    if (cEl) cEl.value = "";
-    if (hintEl) hintEl.innerText = "на 100г: 0 ккал (Б:0 Ж:0 У:0)";
+  if (q.length < 2) {
+    container.innerHTML = "";
+    document.getElementById("foodSearchLoading").style.display = "none";
+    return;
   }
 
-  setTimeout(() => {
-    if (gramsEl) {
-      gramsEl.focus();
-      gramsEl.select();
+  const localMatches = BUILTIN_FOOD_DB.filter(item => item.name.toLowerCase().includes(q));
+  renderSearchResults(localMatches, q);
+}
+
+function renderSearchResults(products, currentQuery = "") {
+  const container = document.getElementById("searchResultsList");
+  container.innerHTML = "";
+
+  if (products.length > 0) {
+    products.forEach(p => {
+      const item = document.createElement("div");
+      item.className = "search-res-item";
+      item.innerHTML = `
+        <div class="search-res-title">${p.name}</div>
+        <div class="search-res-sub">100г: ${p.cals} ккал | Б:${p.prot}г Ж:${p.fat}г У:${p.carb}г</div>
+      `;
+      item.onclick = () => selectProductFromSearch(p);
+      container.appendChild(item);
+    });
+  }
+
+  const extBtn = document.createElement("div");
+  extBtn.style.textAlign = "center";
+  extBtn.style.padding = "8px";
+  extBtn.innerHTML = `
+    <button class="btn-secondary" style="font-size: 0.78rem; width: 100%; border-style: dashed;" onclick="triggerExternalSearch('${currentQuery}')">
+      🌐 Искать «${currentQuery}» во внешней базе Open Food Facts
+    </button>
+  `;
+  container.appendChild(extBtn);
+}
+
+async function triggerExternalSearch(query) {
+  if (!query) return;
+  const loader = document.getElementById("foodSearchLoading");
+  loader.style.display = "flex";
+
+  try {
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`;
+    const res = await fetch(url);
+    const data = await res.json();
+    loader.style.display = "none";
+
+    const parsed = (data.products || [])
+      .filter(p => p.product_name || p.product_name_ru)
+      .map(p => {
+        const n = p.nutriments || {};
+        return {
+          name: `${p.product_name_ru || p.product_name} ${p.brands ? `(${p.brands})` : ""}`.trim(),
+          cals: Math.round(n["energy-kcal_100g"] || n["energy-kcal"] || 0),
+          prot: parseFloat((n.proteins_100g || 0).toFixed(1)),
+          fat: parseFloat((n.fat_100g || 0).toFixed(1)),
+          carb: parseFloat((n.carbohydrates_100g || 0).toFixed(1))
+        };
+      })
+      .filter(p => p.cals > 0);
+
+    if (parsed.length === 0) {
+      alert("Во внешней базе ничего не нашлось. Добавьте продукт через «+ Ввод»!");
+      return;
     }
-  }, 100);
+
+    const container = document.getElementById("searchResultsList");
+    container.innerHTML = "";
+    parsed.forEach(p => {
+      const item = document.createElement("div");
+      item.className = "search-res-item";
+      item.innerHTML = `
+        <div class="search-res-title">${p.name}</div>
+        <div class="search-res-sub">100г: ${p.cals} ккал | Б:${p.prot}г Ж:${p.fat}г У:${p.carb}г</div>
+      `;
+      item.onclick = () => selectProductFromSearch(p);
+      container.appendChild(item);
+    });
+  } catch (e) {
+    loader.style.display = "none";
+    alert("Ошибка соединения с внешней базой.");
+  }
+}
+
+function selectProductFromSearch(prod) {
+  currentPickedProduct = prod;
+  document.getElementById("selectedProductBox").style.display = "flex";
+  document.getElementById("selectedProdName").innerText = prod.name;
+  document.getElementById("selectedProdPer100").innerText = `на 100г: ${prod.cals} ккал (Б:${prod.prot} Ж:${prod.fat} У:${prod.carb})`;
+  document.getElementById("selectedProdGrams").value = "100";
+  updateCalculatedPortion();
+}
+
+function updateCalculatedPortion() {
+  if (!currentPickedProduct) return;
+  const grams = parseFloat(document.getElementById("selectedProdGrams").value) || 0;
+  const factor = grams / 100;
+  const cals = Math.round(currentPickedProduct.cals * factor);
+  const p = (currentPickedProduct.prot * factor).toFixed(1);
+  const f = (currentPickedProduct.fat * factor).toFixed(1);
+  const c = (currentPickedProduct.carb * factor).toFixed(1);
+
+  document.getElementById("calculatedSummary").innerText = `Итого: ${cals} ккал (Б: ${p}г, Ж: ${f}г, У: ${c}г)`;
+}
+
+function addSelectedProductToLog() {
+  if (!currentPickedProduct) return;
+  const grams = parseFloat(document.getElementById("selectedProdGrams").value) || 0;
+  if (grams <= 0) return;
+
+  const factor = grams / 100;
+  const item = {
+    id: Date.now(),
+    name: currentPickedProduct.name,
+    grams: grams,
+    cals: Math.round(currentPickedProduct.cals * factor),
+    p: parseFloat((currentPickedProduct.prot * factor).toFixed(1)),
+    f: parseFloat((currentPickedProduct.fat * factor).toFixed(1)),
+    c: parseFloat((currentPickedProduct.carb * factor).toFixed(1))
+  };
+
+  if (!foodLog[selectedFoodDate]) foodLog[selectedFoodDate] = [];
+  foodLog[selectedFoodDate].push(item);
+  save();
+  closeFoodSearchModal();
+  renderFood();
+}
+
+// ================= БЫСТРЫЙ ВВОД С ПОРЦИЕЙ =================
+function openQuickAddModal(baseData = null) {
+  document.getElementById("quickAddModal").classList.add("active");
+
+  if (baseData) {
+    quickAddBase100 = { ...baseData };
+    document.getElementById("quickAddName").value = baseData.name || "Продукт с фото";
+    document.getElementById("quickAddGrams").value = "100";
+    document.getElementById("quickAddCals").value = baseData.cals || "";
+    document.getElementById("quickAddP").value = baseData.prot || "";
+    document.getElementById("quickAddF").value = baseData.fat || "";
+    document.getElementById("quickAddC").value = baseData.carb || "";
+  } else {
+    quickAddBase100 = null;
+    document.getElementById("quickAddName").value = "";
+    document.getElementById("quickAddGrams").value = "100";
+    document.getElementById("quickAddCals").value = "";
+    document.getElementById("quickAddP").value = "";
+    document.getElementById("quickAddF").value = "";
+    document.getElementById("quickAddC").value = "";
+  }
 }
 
 function recalcQuickAddPortion() {
-  const gramsEl = document.getElementById("quickAddGrams");
-  const grams = gramsEl ? (parseFloat(gramsEl.value) || 0) : 0;
-  if (!quickAddBase100 || quickAddBase100.cals === 0) return;
-
+  if (!quickAddBase100) return;
+  const grams = parseFloat(document.getElementById("quickAddGrams").value) || 0;
   const factor = grams / 100;
-  const calsEl = document.getElementById("quickAddCals");
-  if (calsEl) calsEl.value = Math.round(quickAddBase100.cals * factor);
-  const pEl = document.getElementById("quickAddP");
-  if (pEl) pEl.value = parseFloat((quickAddBase100.prot * factor).toFixed(1));
-  const fEl = document.getElementById("quickAddF");
-  if (fEl) fEl.value = parseFloat((quickAddBase100.fat * factor).toFixed(1));
-  const cEl = document.getElementById("quickAddC");
-  if (cEl) cEl.value = parseFloat((quickAddBase100.carb * factor).toFixed(1));
+
+  document.getElementById("quickAddCals").value = Math.round(quickAddBase100.cals * factor) || "";
+  document.getElementById("quickAddP").value = parseFloat((quickAddBase100.prot * factor).toFixed(1)) || "";
+  document.getElementById("quickAddF").value = parseFloat((quickAddBase100.fat * factor).toFixed(1)) || "";
+  document.getElementById("quickAddC").value = parseFloat((quickAddBase100.carb * factor).toFixed(1)) || "";
 }
 
 function closeQuickAddModal() {
-  const modal = document.getElementById("quickAddModal");
-  if (modal) modal.classList.remove("active");
-  quickAddBase100 = { cals: 0, prot: 0, fat: 0, carb: 0 };
+  document.getElementById("quickAddModal").classList.remove("active");
+  quickAddBase100 = null;
 }
 
 function applyQuickAdd() {
-  const nameEl = document.getElementById("quickAddName");
-  const gramsEl = document.getElementById("quickAddGrams");
-  const calsEl = document.getElementById("quickAddCals");
-
-  const name = nameEl ? (nameEl.value.trim() || "Приём пищи") : "Приём пищи";
-  const grams = gramsEl ? (parseFloat(gramsEl.value) || 100) : 100;
-  const cals = calsEl ? parseFloat(calsEl.value) : 0;
+  const name = document.getElementById("quickAddName").value.trim() || "Приём пищи";
+  const grams = parseFloat(document.getElementById("quickAddGrams").value) || null;
+  const cals = parseFloat(document.getElementById("quickAddCals").value);
 
   if (isNaN(cals) || cals <= 0) {
-    alert("Укажите вес порции или калории");
+    alert("Укажите калории");
     return;
   }
+
+  const p = parseFloat(document.getElementById("quickAddP").value) || 0;
+  const f = parseFloat(document.getElementById("quickAddF").value) || 0;
+  const c = parseFloat(document.getElementById("quickAddC").value) || 0;
 
   if (!foodLog[selectedFoodDate]) foodLog[selectedFoodDate] = [];
   foodLog[selectedFoodDate].push({
@@ -621,9 +770,7 @@ function applyQuickAdd() {
     name,
     grams,
     cals: Math.round(cals),
-    p: parseFloat(document.getElementById("quickAddP")?.value) || 0,
-    f: parseFloat(document.getElementById("quickAddF")?.value) || 0,
-    c: parseFloat(document.getElementById("quickAddC")?.value) || 0
+    p, f, c
   });
 
   save();
@@ -631,115 +778,25 @@ function applyQuickAdd() {
   renderFood();
 }
 
-// ================= ПОИСК БЛЮД =================
-function openFoodSearchModal() {
-  const modal = document.getElementById("foodSearchModal");
-  if (modal) modal.classList.add("active");
-  const queryEl = document.getElementById("foodSearchQuery");
-  if (queryEl) queryEl.value = "";
-  const listEl = document.getElementById("searchResultsList");
-  if (listEl) listEl.innerHTML = "";
-  const selBox = document.getElementById("selectedProductBox");
-  if (selBox) selBox.style.display = "none";
-  currentPickedProduct = null;
-}
-
-function closeFoodSearchModal() {
-  const modal = document.getElementById("foodSearchModal");
-  if (modal) modal.classList.remove("active");
-}
-
-function debounceFoodSearch() {
-  clearTimeout(searchDebounceTimeout);
-  const queryEl = document.getElementById("foodSearchQuery");
-  const q = queryEl ? queryEl.value.trim().toLowerCase() : "";
-  const container = document.getElementById("searchResultsList");
-  if (!container) return;
-
-  if (q.length < 2) {
-    container.innerHTML = "";
-    return;
-  }
-
-  const localMatches = BUILTIN_FOOD_DB.filter(item => item.name.toLowerCase().includes(q));
-  container.innerHTML = "";
-
-  localMatches.forEach(p => {
-    const item = document.createElement("div");
-    item.className = "search-res-item";
-    item.innerHTML = `
-      <div class="search-res-title">${p.name}</div>
-      <div class="search-res-sub">100г: ${p.cals} ккал | Б:${p.prot}г Ж:${p.fat}г У:${p.carb}г</div>
-    `;
-    item.onclick = () => selectProductFromSearch(p);
-    container.appendChild(item);
-  });
-}
-
-function selectProductFromSearch(prod) {
-  currentPickedProduct = prod;
-  const selBox = document.getElementById("selectedProductBox");
-  if (selBox) selBox.style.display = "flex";
-  const nameEl = document.getElementById("selectedProdName");
-  if (nameEl) nameEl.innerText = prod.name;
-  const per100El = document.getElementById("selectedProdPer100");
-  if (per100El) per100El.innerText = `на 100г: ${prod.cals} ккал`;
-  const gramsEl = document.getElementById("selectedProdGrams");
-  if (gramsEl) gramsEl.value = "100";
-  updateCalculatedPortion();
-}
-
-function updateCalculatedPortion() {
-  if (!currentPickedProduct) return;
-  const gramsEl = document.getElementById("selectedProdGrams");
-  const grams = gramsEl ? (parseFloat(gramsEl.value) || 0) : 0;
-  const factor = grams / 100;
-  const cals = Math.round(currentPickedProduct.cals * factor);
-  const sumEl = document.getElementById("calculatedSummary");
-  if (sumEl) sumEl.innerText = `Итого: ${cals} ккал`;
-}
-
-function addSelectedProductToLog() {
-  if (!currentPickedProduct) return;
-  const gramsEl = document.getElementById("selectedProdGrams");
-  const grams = gramsEl ? (parseFloat(gramsEl.value) || 0) : 0;
-  if (grams <= 0) return;
-
-  const factor = grams / 100;
-  if (!foodLog[selectedFoodDate]) foodLog[selectedFoodDate] = [];
-  foodLog[selectedFoodDate].push({
-    id: Date.now(),
-    name: currentPickedProduct.name,
-    grams,
-    cals: Math.round(currentPickedProduct.cals * factor),
-    p: parseFloat((currentPickedProduct.prot * factor).toFixed(1)),
-    f: parseFloat((currentPickedProduct.fat * factor).toFixed(1)),
-    c: parseFloat((currentPickedProduct.carb * factor).toFixed(1))
-  });
-
-  save();
-  closeFoodSearchModal();
-  renderFood();
-}
-
-// ================= GEMINI API =================
+// ================= ИИ-СКАНЕР GEMINI =================
 function openApiKeyModal() {
   const modal = document.getElementById("apiKeyModal");
-  if (modal) modal.classList.add("active");
   const input = document.getElementById("geminiApiKeyInput");
-  if (input) input.value = localStorage.getItem("semavik_gemini_key") || "";
+  input.value = localStorage.getItem("semavik_gemini_key") || "";
+  modal.classList.add("active");
 }
 
 function closeApiKeyModal() {
-  const modal = document.getElementById("apiKeyModal");
-  if (modal) modal.classList.remove("active");
+  document.getElementById("apiKeyModal").classList.remove("active");
 }
 
 function saveApiKey() {
-  const input = document.getElementById("geminiApiKeyInput");
-  const key = input ? input.value.trim() : "";
-  if (key) localStorage.setItem("semavik_gemini_key", key);
-  else localStorage.removeItem("semavik_gemini_key");
+  const key = document.getElementById("geminiApiKeyInput").value.trim();
+  if (key) {
+    localStorage.setItem("semavik_gemini_key", key);
+  } else {
+    localStorage.removeItem("semavik_gemini_key");
+  }
   closeApiKeyModal();
 }
 
@@ -749,8 +806,7 @@ function triggerCameraInput() {
     openApiKeyModal();
     return;
   }
-  const fileInput = document.getElementById("cameraFileInput");
-  if (fileInput) fileInput.click();
+  document.getElementById("cameraFileInput").click();
 }
 
 async function handleNutritionPhoto(event) {
@@ -764,76 +820,114 @@ async function handleNutritionPhoto(event) {
   }
 
   const banner = document.getElementById("aiScanLoader");
-  const statusEl = document.getElementById("aiScanStatus");
+  const status = document.getElementById("aiScanStatus");
   if (banner) banner.style.display = "flex";
-  if (statusEl) statusEl.innerText = "Анализирую этикетку (RU / EN)...";
+  if (status) status.innerText = "Подготовка фото...";
 
   try {
-    const base64DataUrl = await resizeImageToDataUrl(file, 1600, 0.9);
+    const base64DataUrl = await resizeImageToDataUrl(file, 1000, 0.85);
     const base64Clean = base64DataUrl.split(",")[1];
 
-    const promptText = `Analyze this food packaging image (Nutrition Facts / Buldak / Russian label).
-Extract nutrition info.
+    if (status) status.innerText = "Анализирую этикетку (RU / EN)...";
 
-CRITICAL INSTRUCTIONS:
-1. Identify product name in Russian (e.g. "Лапша Buldak Carbonara").
-2. Find total packet net weight or serving size in grams (detectedWeight). Default to 100 if unknown.
-3. Values per 100g:
-   - If the label has per 100g/100ml values, take them directly.
-   - If values are only given per serving/package (e.g. 140g packet, 530 kcal), calculate per 100g: (ValuePerServing / ServingWeight) * 100.
-   - For Energy: strictly use kcal (калории), NOT kJ.
-4. Output strictly JSON matching:
+    const promptText = `Проанализируй фото этикетки пищевой ценности или готового блюда.
+Определи и рассчитай КБЖУ на 100 грамм (или мл).
+Верни ответ СТРОГО в виде JSON объекта без какого-либо дополнительного текста, markdown-блоков или пояснений:
 {
-  "name": "string",
-  "detectedWeight": number,
-  "cals100": number,
-  "prot100": number,
-  "fat100": number,
-  "carb100": number
+  "name": "краткое русское название продукта",
+  "cals": целое_число_калорий,
+  "prot": число_белков,
+  "fat": число_жиров,
+  "carb": число_углеводов
 }`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{
+    const requestBody = {
+      contents: [
+        {
           parts: [
             { text: promptText },
-            { inline_data: { mime_type: "image/jpeg", data: base64Clean } }
+            {
+              inline_data: {
+                mime_type: "image/jpeg",
+                data: base64Clean
+              }
+            }
           ]
-        }],
-        generationConfig: {
-          response_mime_type: "application/json"
         }
-      })
-    });
+      ],
+      generationConfig: {
+        response_mime_type: "application/json"
+      }
+    };
 
-    const data = await res.json();
+    // Очередь моделей с приоритетом gemini-3.6-flash
+    const models = [
+      "gemini-3.6-flash",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash"
+    ];
+
+    let data = null;
+    let lastError = null;
+
+    for (let i = 0; i < models.length; i++) {
+      const m = models[i];
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (res.ok) {
+          data = await res.json();
+          break;
+        }
+
+        const errData = await res.json().catch(() => ({}));
+        const errMsg = errData.error?.message || `HTTP ${res.status}`;
+        lastError = errMsg;
+
+        // Если Google API советует конкретное имя модели в тексте ошибки
+        const match = errMsg.match(/use\s+(models\/[\w\.\-]+|[\w\.\-]+)/i);
+        if (match && match[1]) {
+          const suggested = match[1].replace("models/", "");
+          if (!models.includes(suggested)) {
+            models.splice(i + 1, 0, suggested);
+          }
+        }
+      } catch (err) {
+        lastError = err.message;
+      }
+    }
+
     if (banner) banner.style.display = "none";
 
-    if (data.error) {
-      throw new Error(data.error.message || "Ошибка API");
+    if (!data) {
+      throw new Error(lastError || "Не удалось связаться с сервисом");
     }
 
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) {
-      throw new Error("Не удалось распознать данные");
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const cleanJson = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
+
+    if (cleanJson) {
+      const parsed = JSON.parse(cleanJson);
+      openQuickAddModal({
+        name: parsed.name || "Продукт с фото",
+        cals: parsed.cals || 0,
+        prot: parsed.prot || 0,
+        fat: parsed.fat || 0,
+        carb: parsed.carb || 0
+      });
+    } else {
+      alert("Не удалось извлечь пищевую ценность. Попробуйте сфотографировать ближе.");
     }
-
-    const parsed = JSON.parse(rawText);
-
-    openQuickAddModal({
-      name: parsed.name || "Продукт с фото",
-      detectedWeight: Number(parsed.detectedWeight) || 100,
-      cals100: Math.round(Number(parsed.cals100)) || 0,
-      prot100: parseFloat(Number(parsed.prot100).toFixed(1)) || 0,
-      fat100: parseFloat(Number(parsed.fat100).toFixed(1)) || 0,
-      carb100: parseFloat(Number(parsed.carb100).toFixed(1)) || 0
-    });
-
   } catch (err) {
     if (banner) banner.style.display = "none";
+    console.error("Gemini Vision Error:", err);
     alert(`Ошибка сканирования: ${err.message}`);
   } finally {
     event.target.value = "";
@@ -846,13 +940,20 @@ function resizeImageToDataUrl(file, maxDimension, quality) {
     reader.onload = e => {
       const img = new Image();
       img.onload = () => {
-        let w = img.width, h = img.height;
+        let w = img.width;
+        let h = img.height;
         if (w > maxDimension || h > maxDimension) {
-          if (w > h) { h = Math.round((h * maxDimension) / w); w = maxDimension; }
-          else { w = Math.round((w * maxDimension) / h); h = maxDimension; }
+          if (w > h) {
+            h = Math.round((h * maxDimension) / w);
+            w = maxDimension;
+          } else {
+            w = Math.round((w * maxDimension) / h);
+            h = maxDimension;
+          }
         }
         const canvas = document.createElement("canvas");
-        canvas.width = w; canvas.height = h;
+        canvas.width = w;
+        canvas.height = h;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, w, h);
         resolve(canvas.toDataURL("image/jpeg", quality));
@@ -865,43 +966,40 @@ function resizeImageToDataUrl(file, maxDimension, quality) {
   });
 }
 
-// ================= ЦЕЛИ КБЖУ И БЭКАП =================
+// Цели калорий
 function openCalGoalModal() {
-  const modal = document.getElementById("calGoalModal");
-  if (modal) modal.classList.add("active");
-  const calsEl = document.getElementById("goalInputCals");
-  if (calsEl) calsEl.value = foodGoals.cals;
-  const pEl = document.getElementById("goalInputProtein");
-  if (pEl) pEl.value = foodGoals.p;
-  const fEl = document.getElementById("goalInputFat");
-  if (fEl) fEl.value = foodGoals.f;
-  const cEl = document.getElementById("goalInputCarbs");
-  if (cEl) cEl.value = foodGoals.c;
+  document.getElementById("calGoalModal").classList.add("active");
+  document.getElementById("goalInputCals").value = foodGoals.cals;
+  document.getElementById("goalInputProtein").value = foodGoals.p;
+  document.getElementById("goalInputFat").value = foodGoals.f;
+  document.getElementById("goalInputCarbs").value = foodGoals.c;
 }
 
 function closeCalGoalModal() {
-  const modal = document.getElementById("calGoalModal");
-  if (modal) modal.classList.remove("active");
+  document.getElementById("calGoalModal").classList.remove("active");
 }
 
 function applyCalGoals() {
-  const calsEl = document.getElementById("goalInputCals");
-  const pEl = document.getElementById("goalInputProtein");
-  const fEl = document.getElementById("goalInputFat");
-  const cEl = document.getElementById("goalInputCarbs");
-
-  foodGoals.cals = calsEl ? (parseFloat(calsEl.value) || 2100) : 2100;
-  foodGoals.p = pEl ? (parseFloat(pEl.value) || 140) : 140;
-  foodGoals.f = fEl ? (parseFloat(fEl.value) || 70) : 70;
-  foodGoals.c = cEl ? (parseFloat(cEl.value) || 200) : 200;
+  foodGoals.cals = parseFloat(document.getElementById("goalInputCals").value) || 2100;
+  foodGoals.p = parseFloat(document.getElementById("goalInputProtein").value) || 140;
+  foodGoals.f = parseFloat(document.getElementById("goalInputFat").value) || 70;
+  foodGoals.c = parseFloat(document.getElementById("goalInputCarbs").value) || 200;
 
   save();
   closeCalGoalModal();
   renderFood();
 }
 
+// Экспорт / Импорт
 function exportData() {
-  const blob = new Blob([JSON.stringify({ state, targetWeight, foodLog, foodGoals }, null, 2)], { type: "application/json" });
+  const exportPayload = {
+    version: 3,
+    targetWeight: targetWeight,
+    data: state,
+    foodLog: foodLog,
+    foodGoals: foodGoals
+  };
+  const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = `semavik-backup-${getTodayIso()}.json`;
@@ -915,13 +1013,18 @@ function importData(e) {
   reader.onload = evt => {
     try {
       const parsed = JSON.parse(evt.target.result);
-      if (parsed.state) state = parsed.state;
-      if (parsed.targetWeight !== undefined) targetWeight = parsed.targetWeight;
-      if (parsed.foodLog) foodLog = parsed.foodLog;
-      if (parsed.foodGoals) foodGoals = parsed.foodGoals;
+      if (Array.isArray(parsed)) {
+        state = parsed;
+      } else if (parsed && parsed.data) {
+        state = parsed.data;
+        targetWeight = parsed.targetWeight !== undefined ? parsed.targetWeight : null;
+        if (parsed.foodLog) foodLog = parsed.foodLog;
+        if (parsed.foodGoals) foodGoals = parsed.foodGoals;
+      }
       save();
+      renderFood();
     } catch {
-      alert("Неверный формат файла бэкапа");
+      alert("Неверный формат бэкапа");
     }
   };
   reader.readAsText(file);
@@ -934,13 +1037,5 @@ function render() {
   renderFood();
 }
 
-// Запуск после загрузки DOM
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    applyTheme();
-    render();
-  });
-} else {
-  applyTheme();
-  render();
-}
+applyTheme();
+render();
