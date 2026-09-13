@@ -1,5 +1,6 @@
 # 💉 Semaglutide & Food Vision Tracker
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue?style=flat-square)](https://github.com/rummelkotik/semavik-tracker/releases/tag/v1.0.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![Powered by Gemini](https://img.shields.io/badge/AI-Google%20Gemini%20Vision-blue.svg)](https://ai.google.dev/)
 [![PWA Ready](https://img.shields.io/badge/PWA-iOS%20%2F%20Android-orange.svg)](#-установка-как-приложение-pwa)
