@@ -705,7 +705,7 @@ function addSelectedProductToLog() {
   renderFood();
 }
 
-// ================= ФОТО-СКАНЕР КБЖУ С УПАКОВКИ =================
+// ================= ФОТО-СКАНЕР КБЖУ С ОПТИМИЗАЦИЕЙ =================
 async function handleNutritionPhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -713,75 +713,116 @@ async function handleNutritionPhoto(event) {
   const banner = document.getElementById("aiScanLoader");
   const status = document.getElementById("aiScanStatus");
   banner.style.display = "flex";
-  status.innerText = "Анализируем фото упаковки...";
+  status.innerText = "Сжатие и подготовка фото...";
 
   try {
-    const base64 = await fileToBase64(file);
+    // 1. Сжимаем фото прямо на телефоне до ~1200px (быстрая передача)
+    const compressedBase64 = await resizeAndCompressImage(file, 1200, 0.85);
 
-    // Запрос к бесплатному оптическому распознаванию текста (OCR Space Engine с русским языком)
+    status.innerText = "Распознаём таблицу КБЖУ...";
+
+    // 2. Отправка на OCR
     const formData = new FormData();
-    formData.append("base64Image", base64);
+    formData.append("base64Image", compressedBase64);
     formData.append("language", "rus");
     formData.append("isOverlayRequired", "false");
     formData.append("OCREngine", "2");
+    formData.append("scale", "true");
 
     const res = await fetch("https://api.ocr.space/parse/image", {
       method: "POST",
-      headers: { apikey: "K87899142388957" }, // открытый публичный бесплатный OCR ключ
+      headers: { apikey: "K87899142388957" },
       body: formData
     });
 
     const data = await res.json();
     banner.style.display = "none";
 
-    if (data.ParsedResults && data.ParsedResults[0] && data.ParsedResults[0].ParsedText) {
-      const fullText = data.ParsedResults[0].ParsedText;
-      parseNutritionTextAndOpen(fullText);
-    } else {
-      alert("Не удалось разобрать текст на фото. Попробуйте сфотографировать таблицу чётче и ближе.");
+    if (data && data.ParsedResults && data.ParsedResults[0]) {
+      const fullText = data.ParsedResults[0].ParsedText || "";
+      if (fullText.trim().length > 0) {
+        parseNutritionTextAndOpen(fullText);
+        return;
+      }
     }
+    
+    alert("Текст не распознан. Сделайте фото ближе к таблице пищевой ценности или воспользуйтесь кнопкой «+ Ввод».");
   } catch (err) {
     banner.style.display = "none";
-    console.error("Photo scan error:", err);
-    alert("Ошибка сканирования фото. Введите данные через кнопку «+ Ввод».");
+    console.error("OCR Error:", err);
+    alert("Не удалось обработать фото. Попробуйте еще раз или используйте «+ Ввод».");
+  } finally {
+    event.target.value = "";
   }
-
-  event.target.value = "";
 }
 
-function fileToBase64(file) {
+// Сжатие изображения через Canvas перед отправкой
+function resizeAndCompressImage(file, maxDimension, quality) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width;
+        let h = img.height;
+
+        if (w > maxDimension || h > maxDimension) {
+          if (w > h) {
+            h = Math.round((h * maxDimension) / w);
+            w = maxDimension;
+          } else {
+            w = Math.round((w * maxDimension) / h);
+            h = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // Получаем чистый JPEG Base64
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
 }
 
-// Извлечение калорий, белков, жиров и углеводов из текста фото регулярками
+// Парсинг калорий и макросов с поддержкой опечаток OCR
 function parseNutritionTextAndOpen(text) {
-  const lower = text.toLowerCase().replace(/,/g, ".");
+  const clean = text.replace(/,/g, ".");
 
-  // Поиск калорий (ккал / kcal)
-  const calMatch = lower.match(/(\d+[\.,]?\d*)\s*(ккал|ккап|kcal)/i) || lower.match(/(калори[йность]*|энерг[а-я]*)\D*(\d+[\.,]?\d*)/i);
+  // Калории: поиск числа перед ккал/kcal или после слов "энергетическая ценность/калорийность"
   let cals = 0;
+  const calMatch = clean.match(/(\d+[\.]?\d*)\s*(ккал|ккап|кка|kcal)/i) || 
+                   clean.match(/(калор[а-я]*|энерг[а-я]*)\D*(\d+[\.]?\d*)/i);
   if (calMatch) {
-    cals = Math.round(parseFloat(calMatch[1] || calMatch[2]));
+    const val = parseFloat(calMatch[1] && !isNaN(calMatch[1]) ? calMatch[1] : calMatch[2]);
+    if (!isNaN(val)) cals = Math.round(val);
   }
 
   // Белки
-  const pMatch = lower.match(/белк[а-я]*\D*(\d+[\.,]?\d*)/i);
-  const p = pMatch ? parseFloat(pMatch[1]) : 0;
+  let p = 0;
+  const pMatch = clean.match(/белк[а-я]*\D*(\d+[\.]?\d*)/i);
+  if (pMatch && !isNaN(pMatch[1])) p = parseFloat(pMatch[1]);
 
   // Жиры
-  const fMatch = lower.match(/жир[а-я]*\D*(\d+[\.,]?\d*)/i);
-  const f = fMatch ? parseFloat(fMatch[1]) : 0;
+  let f = 0;
+  const fMatch = clean.match(/жир[а-я]*\D*(\d+[\.]?\d*)/i);
+  if (fMatch && !isNaN(fMatch[1])) f = parseFloat(fMatch[1]);
 
   // Углеводы
-  const cMatch = lower.match(/углев[а-я]*\D*(\d+[\.,]?\d*)/i);
-  const c = cMatch ? parseFloat(cMatch[1]) : 0;
+  let c = 0;
+  const cMatch = clean.match(/углев[а-я]*\D*(\d+[\.]?\d*)/i);
+  if (cMatch && !isNaN(cMatch[1])) c = parseFloat(cMatch[1]);
 
-  // Предзаполняем модалку продукта
+  // Открываем модалку быстрого ввода с заполненными полями
   openQuickAddModal();
   document.getElementById("quickAddName").value = "Продукт с упаковки";
   if (cals > 0) document.getElementById("quickAddCals").value = cals;
