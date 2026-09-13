@@ -35,49 +35,133 @@
       <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Сменить тему">☀️</button>
     </div>
 
-    <!-- Панель статистики веса и цели -->
-    <div class="stats-wrapper">
-      <div class="stats-bar">
-        <div class="stat-cell">
-          <span class="stat-title">Старт:</span>
-          <span class="stat-val" id="disp-start">—</span>
+    <!-- Переключатель вкладок с векторными SVG-иконками -->
+    <div class="tab-switch">
+      <button class="tab-btn active" id="tabBtnWeight" onclick="switchTab('weight')">
+        <svg class="tab-icon" viewBox="0 0 24 24" width="16" height="16">
+          <path d="M18 2L22 6M19 5L14 10M17 8L7 18H3V14L13 4M8 13L11 16M2 22L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Терапия и вес</span>
+      </button>
+
+      <button class="tab-btn" id="tabBtnFood" onclick="switchTab('food')">
+        <svg class="tab-icon" viewBox="0 0 24 24" width="16" height="16">
+          <path d="M4 11C4 16 7.5 19 12 19C16.5 19 20 16 20 11H4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M12 11V6M12 6C12 4 14 3 16 3C16 5 14 6 12 6ZM12 7C12 5.5 10.5 4.5 9 4.5C9 6 10.5 7 12 7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Питание</span>
+      </button>
+    </div>
+
+    <!-- ВКЛАДКА 1: ТЕРАПИЯ И ВЕС -->
+    <div id="tabWeightContent" class="tab-content active">
+      <!-- Панель статистики веса и цели -->
+      <div class="stats-wrapper">
+        <div class="stats-bar">
+          <div class="stat-cell">
+            <span class="stat-title">Старт:</span>
+            <span class="stat-val" id="disp-start">—</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-title">Текущий:</span>
+            <span class="stat-val" id="disp-current">—</span>
+          </div>
+          <div class="stat-cell target-cell" onclick="openTargetModal()" title="Нажмите, чтобы задать цель">
+            <span class="stat-title">Цель:</span>
+            <span class="stat-val" id="disp-target">—</span>
+          </div>
+          <div class="stat-cell highlight">
+            <span class="stat-title" id="disp-diff-title">Сброшено:</span>
+            <span class="stat-val" id="disp-diff">—</span>
+          </div>
         </div>
-        <div class="stat-cell">
-          <span class="stat-title">Текущий:</span>
-          <span class="stat-val" id="disp-current">—</span>
-        </div>
-        <div class="stat-cell target-cell" onclick="openTargetModal()" title="Нажмите, чтобы задать цель">
-          <span class="stat-title">Цель:</span>
-          <span class="stat-val" id="disp-target">—</span>
-        </div>
-        <div class="stat-cell highlight">
-          <span class="stat-title" id="disp-diff-title">Сброшено:</span>
-          <span class="stat-val" id="disp-diff">—</span>
+
+        <!-- Прогресс-бар пути к цели -->
+        <div class="target-progress-container" id="progressBox" style="display: none;">
+          <div class="target-progress-labels">
+            <span id="progressText">Прогресс к цели: 0%</span>
+            <span id="progressRemaining">Осталось: —</span>
+          </div>
+          <div class="target-progress-track">
+            <div class="target-progress-bar" id="targetProgressBar" style="width: 0%;"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Прогресс-бар пути к цели -->
-      <div class="target-progress-container" id="progressBox" style="display: none;">
-        <div class="target-progress-labels">
-          <span id="progressText">Прогресс к цели: 0%</span>
-          <span id="progressRemaining">Осталось: —</span>
+      <!-- График веса -->
+      <div class="chart-box">
+        <canvas id="weightChart"></canvas>
+      </div>
+
+      <!-- Список недель -->
+      <div class="entry-list" id="entryList"></div>
+    </div>
+
+    <!-- ВКЛАДКА 2: ПИТАНИЕ И КАЛОРИИ -->
+    <div id="tabFoodContent" class="tab-content">
+      <!-- Селектор даты питания -->
+      <div class="food-date-header">
+        <button class="food-date-btn" onclick="changeFoodDate(-1)">‹</button>
+        <span class="food-date-title" id="foodDateLabel">Сегодня</span>
+        <button class="food-date-btn" onclick="changeFoodDate(1)">›</button>
+      </div>
+
+      <!-- Сводка калорий и БЖУ -->
+      <div class="calories-summary-card">
+        <div class="cal-main-row">
+          <div class="cal-circle-info">
+            <span class="cal-consumed" id="foodTotalCals">0</span>
+            <span class="cal-sub">из <span id="foodTargetCals" onclick="openCalGoalModal()" class="editable-target">2100</span> ккал</span>
+          </div>
+          <div class="cal-remain-info">
+            <span class="cal-remain-title">Осталось</span>
+            <span class="cal-remain-val" id="foodRemainCals">2100</span>
+          </div>
         </div>
-        <div class="target-progress-track">
-          <div class="target-progress-bar" id="targetProgressBar" style="width: 0%;"></div>
+
+        <!-- Полоска калорий -->
+        <div class="target-progress-track" style="margin-top: 10px;">
+          <div class="target-progress-bar" id="foodCalProgress" style="width: 0%;"></div>
+        </div>
+
+        <!-- Макросы (Б/Ж/У) -->
+        <div class="macros-grid">
+          <div class="macro-item">
+            <span class="macro-name">Белки</span>
+            <span class="macro-val" id="foodTotalProtein">0г</span>
+            <span class="macro-target" id="foodTargetProtein">/ 140г</span>
+          </div>
+          <div class="macro-item">
+            <span class="macro-name">Жиры</span>
+            <span class="macro-val" id="foodTotalFat">0г</span>
+            <span class="macro-target" id="foodTargetFat">/ 70г</span>
+          </div>
+          <div class="macro-item">
+            <span class="macro-name">Углеводы</span>
+            <span class="macro-val" id="foodTotalCarbs">0г</span>
+            <span class="macro-target" id="foodTargetCarbs">/ 200г</span>
+          </div>
         </div>
       </div>
+
+      <!-- Блок добавления еды -->
+      <div class="food-add-trigger-box">
+        <button class="btn-primary add-food-btn" onclick="openFoodSearchModal()">
+          <svg class="search-btn-icon" viewBox="0 0 24 24" width="16" height="16">
+            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2.2"/>
+            <path d="M16.5 16.5L21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+          <span>Поиск в базе</span>
+        </button>
+        <button class="btn-secondary add-food-quick-btn" onclick="openQuickAddModal()">+ Быстрый ввод</button>
+      </div>
+
+      <!-- Список съеденного за день -->
+      <div class="food-log-list" id="foodLogList"></div>
     </div>
 
-    <!-- Блок графика -->
-    <div class="chart-box">
-      <canvas id="weightChart"></canvas>
-    </div>
-
-    <!-- Список недель -->
-    <div class="entry-list" id="entryList"></div>
-
-    <!-- Фиксированная нижняя панель действий -->
-    <div class="bottom-bar">
+    <!-- Фиксированная нижняя панель (для вкладки веса) -->
+    <div class="bottom-bar" id="bottomBarWeight">
       <button class="btn-secondary add-btn" onclick="addNewWeek()">+ Добавить следующую неделю</button>
       <div class="actions-footer">
         <button class="btn-secondary" onclick="exportData()">Резервная копия</button>
@@ -89,7 +173,9 @@
     </div>
   </div>
 
-  <!-- Модальное окно смены даты старта -->
+  <!-- МОДАЛЬНЫЕ ОКНА -->
+
+  <!-- Модальное окно смены даты старта уколов -->
   <div id="dateModal" class="custom-modal-overlay">
     <div class="custom-modal">
       <div class="modal-title">Дата первого укола</div>
@@ -102,15 +188,88 @@
     </div>
   </div>
 
-  <!-- Модальное окно установки цели -->
+  <!-- Модальное окно установки целевого веса -->
   <div id="targetModal" class="custom-modal-overlay">
     <div class="custom-modal">
       <div class="modal-title">Целевой вес</div>
-      <div class="modal-sub">Задайте желаемый вес в кг для расчёта прогресса и отображения на графике</div>
+      <div class="modal-sub">Желаемый вес для расчёта шкалы и отображения на графике</div>
       <input type="number" step="0.1" id="customTargetInput" class="modal-date-field" placeholder="например: 85" />
       <div class="modal-actions">
         <button type="button" class="modal-btn cancel" onclick="closeTargetModal()">Отмена</button>
         <button type="button" class="modal-btn confirm" onclick="applyCustomTarget()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно настройки дневных калорий и БЖУ -->
+  <div id="calGoalModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+      <div class="modal-title">Дневные цели</div>
+      <div class="modal-sub">Задайте целевую калорийность и нормы БЖУ</div>
+      
+      <label class="modal-field-label">Калории (ккал):</label>
+      <input type="number" id="goalInputCals" class="modal-date-field" placeholder="2100" />
+      
+      <label class="modal-field-label">Белки (г):</label>
+      <input type="number" id="goalInputProtein" class="modal-date-field" placeholder="140" />
+
+      <label class="modal-field-label">Жиры (г):</label>
+      <input type="number" id="goalInputFat" class="modal-date-field" placeholder="70" />
+
+      <label class="modal-field-label">Углеводы (г):</label>
+      <input type="number" id="goalInputCarbs" class="modal-date-field" placeholder="200" />
+
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" onclick="closeCalGoalModal()">Отмена</button>
+        <button type="button" class="modal-btn confirm" onclick="applyCalGoals()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно поиска продуктов Open Food Facts -->
+  <div id="foodSearchModal" class="custom-modal-overlay">
+    <div class="custom-modal food-search-modal">
+      <div class="modal-title">Поиск продукта</div>
+      <div class="search-input-wrap">
+        <input type="text" id="foodSearchQuery" class="modal-date-field" placeholder="Название продукта (например: Творог 5%)" oninput="debounceFoodSearch()" />
+        <span id="foodSearchLoading" class="search-loader" style="display: none;">⏳</span>
+      </div>
+
+      <!-- Список результатов поиска -->
+      <div class="search-results-list" id="searchResultsList"></div>
+
+      <!-- Форма ввода граммов выбранного продукта -->
+      <div id="selectedProductBox" class="selected-product-box" style="display: none;">
+        <div class="selected-prod-name" id="selectedProdName">Продукт</div>
+        <div class="selected-prod-per100" id="selectedProdPer100">на 100г: 0 ккал (Б:0 Ж:0 У:0)</div>
+        <div class="grams-input-row">
+          <label>Вес (граммы):</label>
+          <input type="number" id="selectedProdGrams" class="modal-date-field grams-field" value="100" oninput="updateCalculatedPortion()" />
+        </div>
+        <div class="calculated-summary" id="calculatedSummary">Итого: 0 ккал</div>
+        <button type="button" class="modal-btn confirm" onclick="addSelectedProductToLog()">Добавить в рацион</button>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" onclick="closeFoodSearchModal()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно быстрого ввода -->
+  <div id="quickAddModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+      <div class="modal-title">Быстрый ввод еды</div>
+      <input type="text" id="quickAddName" class="modal-date-field" placeholder="Название (например: Обед)" />
+      <input type="number" id="quickAddCals" class="modal-date-field" placeholder="Калории (ккал) *" />
+      <div style="display: flex; gap: 6px;">
+        <input type="number" id="quickAddP" class="modal-date-field" placeholder="Белки (г)" />
+        <input type="number" id="quickAddF" class="modal-date-field" placeholder="Жиры (г)" />
+        <input type="number" id="quickAddC" class="modal-date-field" placeholder="Углев. (г)" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" onclick="closeQuickAddModal()">Отмена</button>
+        <button type="button" class="modal-btn confirm" onclick="applyQuickAdd()">Добавить</button>
       </div>
     </div>
   </div>
