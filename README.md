@@ -9,7 +9,11 @@
 
 [🚀 **Открыть приложение**](https://semavik-tracker.vercel.app)
 
----
+<p align="center">
+  <img src="preview-weight.jpg" width="280" alt="Терапия и динамика веса" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="preview-food.jpg" width="280" alt="Дневник питания и КБЖУ" />
+</p>
 
 ## 🌟 Возможности
 
