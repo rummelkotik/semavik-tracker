@@ -753,7 +753,7 @@ function triggerCameraInput() {
   if (fileInput) fileInput.click();
 }
 
-aasync function handleNutritionPhoto(event) {
+async function handleNutritionPhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
 
@@ -769,15 +769,15 @@ aasync function handleNutritionPhoto(event) {
   if (statusEl) statusEl.innerText = "Анализирую этикетку (RU / EN)...";
 
   try {
-    // 1600px сохраняет читаемость мелкого текста таблиц
     const base64DataUrl = await resizeImageToDataUrl(file, 1600, 0.9);
     const base64Clean = base64DataUrl.split(",")[1];
 
-    const promptText = `Analyze this food label or meal photo. It may be in Russian ("Пищевая ценность"), English ("Nutrition Facts"), or Korean ("영양정보", e.g. Buldak).
+    const promptText = `Analyze this food packaging image (Nutrition Facts / Buldak / Russian label).
+Extract nutrition info.
 
-Rules:
-1. Product name: Russian concise name (e.g. "Лапша Buldak Carbonara", "Творог 5%").
-2. Portion weight (detectedWeight): Total package net weight or serving size in grams. If unknown, use 100.
+CRITICAL INSTRUCTIONS:
+1. Identify product name in Russian (e.g. "Лапша Buldak Carbonara").
+2. Find total packet net weight or serving size in grams (detectedWeight). Default to 100 if unknown.
 3. Values per 100g:
    - If the label has per 100g/100ml values, take them directly.
    - If values are only given per serving/package (e.g. 140g packet, 530 kcal), calculate per 100g: (ValuePerServing / ServingWeight) * 100.
