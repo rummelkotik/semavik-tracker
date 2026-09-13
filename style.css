@@ -831,15 +831,19 @@ body.light-theme .bottom-bar {
   margin: 0 4px;
 }
 
-/* Фикс ширины поля даты и текстовых инпутов для iOS */
+/* Фикс поля даты и ввода для идеального центрирования на iOS Safari */
 .modal-date-field {
   -webkit-appearance: none;
   appearance: none;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  height: 44px;
+  height: 46px;
+  min-height: 46px;
+  line-height: 46px;
   box-sizing: border-box;
   background: var(--card-inner);
   border: 1px solid var(--border);
@@ -854,9 +858,15 @@ body.light-theme .bottom-bar {
   margin: 0;
 }
 
+/* Центрирование текста даты внутри WebKit на iPhone */
 .modal-date-field::-webkit-date-and-time-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0 auto;
   text-align: center;
-  margin: 0;
+  line-height: normal;
 }
 
 body.light-theme .modal-date-field {
