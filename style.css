@@ -443,7 +443,7 @@ body.light-theme .logo-strokes {
   color: #ef4444;
 }
 
-/* ================= ВКЛАДКА ПИТАНИЯ ================= */
+/* ================= ПИТАНИЕ ================= */
 .food-date-header {
   display: flex;
   align-items: center;
@@ -614,7 +614,6 @@ body.light-theme .search-btn-icon {
   justify-content: center;
 }
 
-/* Плашка сканирования фото */
 .ai-scan-banner {
   background: var(--card-bg);
   border: 1px solid var(--accent-blue);

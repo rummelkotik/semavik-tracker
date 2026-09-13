@@ -11,8 +11,6 @@
 
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Клиентский движок распознавания текста Tesseract OCR -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
   <div class="screen">
@@ -34,7 +32,15 @@
         </svg>
         <div class="app-title">Семавик</div>
       </div>
-      <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Сменить тему">☀️</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="theme-toggle-btn" onclick="openApiKeyModal()" title="Настройки ИИ сканера">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+            <circle cx="12" cy="12" r="4"/>
+          </svg>
+        </button>
+        <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Сменить тему">☀️</button>
+      </div>
     </div>
 
     <!-- Переключатель вкладок -->
@@ -138,7 +144,7 @@
         </div>
       </div>
 
-      <!-- Кнопки: Поиск, Скан фото КБЖУ, Ручной ввод -->
+      <!-- Кнопки: Поиск, ИИ-Скан камеры, Ручной ввод -->
       <div class="food-add-trigger-box">
         <button class="btn-primary add-food-btn" onclick="openFoodSearchModal()">
           <svg class="search-btn-icon" viewBox="0 0 24 24" width="16" height="16">
@@ -148,25 +154,26 @@
           <span>Поиск</span>
         </button>
 
-        <label class="btn-secondary add-food-scan-label" title="Сфотографировать КБЖУ упаковки">
+        <!-- Кнопка фото-сканера с камеры -->
+        <button type="button" class="btn-secondary add-food-scan-label" onclick="triggerCameraInput()" title="Сфотографировать КБЖУ или блюдо">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
             <circle cx="12" cy="13" r="4"/>
           </svg>
-          <input type="file" accept="image/*" capture="environment" onchange="handleNutritionPhoto(event)" style="display: none;" />
-        </label>
+          <input type="file" id="cameraFileInput" accept="image/*" capture="environment" onchange="handleNutritionPhoto(event)" style="display: none;" />
+        </button>
 
         <button class="btn-secondary add-food-quick-btn" onclick="openQuickAddModal()">+ Ввод</button>
       </div>
 
-      <!-- Плашка прогресса распознавания фото -->
+      <!-- Плашка статуса ИИ сканирования -->
       <div id="aiScanLoader" class="ai-scan-banner" style="display: none;">
         <div class="search-loader-static">
           <svg viewBox="0 0 24 24" width="18" height="18" class="spin">
             <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-linecap="round"/>
           </svg>
         </div>
-        <span id="aiScanStatus">Сканируем таблицу КБЖУ...</span>
+        <span id="aiScanStatus">ИИ распознаёт состав и КБЖУ...</span>
       </div>
 
       <div class="food-log-list" id="foodLogList"></div>
@@ -186,6 +193,23 @@
   </div>
 
   <!-- МОДАЛЬНЫЕ ОКНА -->
+
+  <!-- Модальное окно настроек Gemini API Key -->
+  <div id="apiKeyModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+      <div class="modal-title">ИИ-сканер КБЖУ</div>
+      <div class="modal-sub">
+        Для мгновенного распознавания этикеток и блюд по фото используется Google Gemini Vision.
+        Бесплатный ключ берётся за 1 минуту без карт:
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color: var(--accent-blue); text-decoration: underline; display: inline-block; margin-top: 4px;">aistudio.google.com/app/apikey</a>
+      </div>
+      <input type="text" id="geminiApiKeyInput" class="modal-date-field" placeholder="Вставьте ключ AIzaSy..." />
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" onclick="closeApiKeyModal()">Отмена</button>
+        <button type="button" class="modal-btn confirm" onclick="saveApiKey()">Сохранить</button>
+      </div>
+    </div>
+  </div>
 
   <div id="dateModal" class="custom-modal-overlay">
     <div class="custom-modal">

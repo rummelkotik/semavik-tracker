@@ -105,7 +105,6 @@ let activeTab = "weight";
 
 let currentPickedProduct = null;
 let searchDebounceTimeout = null;
-let tesseractWorker = null;
 
 function applyTheme() {
   const themeBtn = document.getElementById("themeBtn");
@@ -465,7 +464,7 @@ function renderSchedule() {
   });
 }
 
-// ================= ПИТАНИЕ И ПОИСК =================
+// ================= ПИТАНИЕ =================
 function changeFoodDate(deltaDays) {
   const [y, m, d] = selectedFoodDate.split("-").map(Number);
   const curDate = new Date(y, m - 1, d);
@@ -706,86 +705,144 @@ function addSelectedProductToLog() {
   renderFood();
 }
 
-// ================= ЛОКАЛЬНЫЙ OCR-СКАНЕР (TESSERACT.JS) =================
+// ================= ИИ-СКАНЕР GEMINI VISION =================
+function openApiKeyModal() {
+  const modal = document.getElementById("apiKeyModal");
+  const input = document.getElementById("geminiApiKeyInput");
+  input.value = localStorage.getItem("semavik_gemini_key") || "";
+  modal.classList.add("active");
+}
+
+function closeApiKeyModal() {
+  document.getElementById("apiKeyModal").classList.remove("active");
+}
+
+function saveApiKey() {
+  const key = document.getElementById("geminiApiKeyInput").value.trim();
+  if (key) {
+    localStorage.setItem("semavik_gemini_key", key);
+  } else {
+    localStorage.removeItem("semavik_gemini_key");
+  }
+  closeApiKeyModal();
+}
+
+function triggerCameraInput() {
+  const key = localStorage.getItem("semavik_gemini_key");
+  if (!key) {
+    openApiKeyModal();
+    return;
+  }
+  document.getElementById("cameraFileInput").click();
+}
+
 async function handleNutritionPhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
 
+  const apiKey = localStorage.getItem("semavik_gemini_key");
+  if (!apiKey) {
+    openApiKeyModal();
+    return;
+  }
+
   const banner = document.getElementById("aiScanLoader");
   const status = document.getElementById("aiScanStatus");
   banner.style.display = "flex";
-  status.innerText = "Подготовка и контрастирование фото...";
+  status.innerText = "Подготовка фото...";
 
   try {
-    const processedCanvas = await preprocessImageForOCR(file);
-    status.innerText = "Загрузка движка распознавания...";
+    // Сжимаем фото на Canvas до компактных ~1000px для мгновенной отправки
+    const base64DataUrl = await resizeImageToDataUrl(file, 1000, 0.85);
+    const base64Clean = base64DataUrl.split(",")[1];
 
-    if (!tesseractWorker) {
-      tesseractWorker = await Tesseract.createWorker("rus+eng", 1, {
-        logger: m => {
-          if (m.status === "recognizing text") {
-            const pct = Math.round((m.progress || 0) * 100);
-            status.innerText = `Сканируем таблицу КБЖУ: ${pct}%`;
+    status.innerText = "ИИ анализирует фото...";
+
+    const promptText = `Проанализируй фото этикетки с пищевой ценностью (или блюда). Извлеки или рассчитай КБЖУ на 100 грамм (или на порцию).
+Верни ответ СТРОГО в формате JSON без markdown форматирования со следующими полями:
+{
+  "name": "краткое русское название продукта",
+  "cals": целое число калорий (ккал),
+  "prot": белки в граммах (число),
+  "fat": жиры в граммах (число),
+  "carb": углеводы в граммах (число)
+}`;
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: promptText },
+              {
+                inline_data: {
+                  mime_type: "image/jpeg",
+                  data: base64Clean
+                }
+              }
+            ]
           }
+        ],
+        generationConfig: {
+          response_mime_type: "application/json"
         }
-      });
+      })
+    });
+
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error?.message || "Ошибка API Gemini");
     }
 
-    const ret = await tesseractWorker.recognize(processedCanvas);
-    const text = ret.data.text || "";
+    const data = await res.json();
     banner.style.display = "none";
 
-    if (text.trim().length > 3) {
-      parseNutritionTextAndOpen(text);
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (replyText) {
+      const parsed = JSON.parse(replyText);
+      openQuickAddModal();
+      document.getElementById("quickAddName").value = parsed.name || "Продукт с фото";
+      document.getElementById("quickAddCals").value = parsed.cals || "";
+      document.getElementById("quickAddP").value = parsed.prot || "";
+      document.getElementById("quickAddF").value = parsed.fat || "";
+      document.getElementById("quickAddC").value = parsed.carb || "";
     } else {
-      alert("Не удалось прочитать текст на этом фото. Сфотографируйте таблицу чуть ближе и ровнее.");
+      alert("ИИ не смог найти пищевую ценность на этом фото.");
     }
   } catch (err) {
     banner.style.display = "none";
-    console.error("Local OCR error:", err);
-    alert("Ошибка распознавания. Воспользуйтесь кнопкой «+ Ввод».");
+    console.error("Gemini Vision Error:", err);
+    alert(`Ошибка ИИ-сканера: ${err.message}. Проверьте правильность API ключа в настройках.`);
   } finally {
     event.target.value = "";
   }
 }
 
-function preprocessImageForOCR(file) {
+function resizeImageToDataUrl(file, maxDimension, quality) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = e => {
       const img = new Image();
       img.onload = () => {
-        const maxDim = 1200;
         let w = img.width;
         let h = img.height;
-
-        if (w > maxDim || h > maxDim) {
+        if (w > maxDimension || h > maxDimension) {
           if (w > h) {
-            h = Math.round((h * maxDim) / w);
-            w = maxDim;
+            h = Math.round((h * maxDimension) / w);
+            w = maxDimension;
           } else {
-            w = Math.round((w * maxDim) / h);
-            h = maxDim;
+            w = Math.round((w * maxDimension) / h);
+            h = maxDimension;
           }
         }
-
         const canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, w, h);
-
-        const imgData = ctx.getImageData(0, 0, w, h);
-        const d = imgData.data;
-        for (let i = 0; i < d.length; i += 4) {
-          const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-          const val = gray > 128 ? Math.min(255, gray * 1.2) : gray * 0.8;
-          d[i] = val;
-          d[i + 1] = val;
-          d[i + 2] = val;
-        }
-        ctx.putImageData(imgData, 0, 0);
-        resolve(canvas);
+        resolve(canvas.toDataURL("image/jpeg", quality));
       };
       img.onerror = reject;
       img.src = e.target.result;
@@ -793,37 +850,6 @@ function preprocessImageForOCR(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-}
-
-function parseNutritionTextAndOpen(rawText) {
-  const clean = rawText.toLowerCase().replace(/,/g, ".");
-
-  let cals = 0;
-  const calMatch = clean.match(/(\d+[\.]?\d*)\s*(ккал|ккап|кк|kcal)/i) || 
-                   clean.match(/(калор[а-я]*|энерг[а-я]*)\D*(\d+[\.]?\d*)/i);
-  if (calMatch) {
-    const num = parseFloat(calMatch[1] && !isNaN(calMatch[1]) ? calMatch[1] : calMatch[2]);
-    if (!isNaN(num) && num > 0) cals = Math.round(num);
-  }
-
-  let p = 0;
-  const pMatch = clean.match(/белк[а-я]*\D*(\d+[\.]?\d*)/i);
-  if (pMatch && !isNaN(pMatch[1])) p = parseFloat(pMatch[1]);
-
-  let f = 0;
-  const fMatch = clean.match(/жир[а-я]*\D*(\d+[\.]?\d*)/i);
-  if (fMatch && !isNaN(fMatch[1])) f = parseFloat(fMatch[1]);
-
-  let c = 0;
-  const cMatch = clean.match(/углев[а-я]*\D*(\d+[\.]?\d*)/i);
-  if (cMatch && !isNaN(cMatch[1])) c = parseFloat(cMatch[1]);
-
-  openQuickAddModal();
-  document.getElementById("quickAddName").value = "Продукт с упаковки";
-  if (cals > 0) document.getElementById("quickAddCals").value = cals;
-  if (p > 0) document.getElementById("quickAddP").value = p;
-  if (f > 0) document.getElementById("quickAddF").value = f;
-  if (c > 0) document.getElementById("quickAddC").value = c;
 }
 
 // ================= БЫСТРЫЙ ВВОД =================
