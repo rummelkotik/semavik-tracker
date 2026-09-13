@@ -1,35 +1,35 @@
 :root {
-  --bg: #121820;
-  --body-bg: #0b0f14;
-  --card-bg: #1a222d;
-  --card-inner: #151d26;
-  --border: #263342;
-  --text-main: #e2e8f0;
-  --text-sub: #7e8e9f;
-  --green-btn: #15803d;
-  --green-badge: #16a34a;
+  --bg: #0b1118;
+  --body-bg: #0b1118;
+  --card-bg: #121b24;
+  --card-inner: #182330;
+  --border: #233446;
+  --text-main: #f1f5f9;
+  --text-sub: #7a8f9f;
   --accent-blue: #38bdf8;
-  --btn-uncompleted-bg: #243040;
-  --btn-uncompleted-text: #7e8e9f;
-  --btn-uncompleted-border: transparent;
-  --add-btn-bg: #1e293b;
-  --add-btn-border: #38bdf8;
+  --green-btn: #10b981;
+  --green-badge: #10b981;
+  --btn-uncompleted-bg: #1e293b;
+  --btn-uncompleted-text: #94a3b8;
+  --btn-uncompleted-border: #334155;
+  --add-btn-bg: #111e2e;
+  --add-btn-border: #0284c7;
   --add-btn-text: #38bdf8;
-  --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 body.light-theme {
   --bg: #ffffff;
-  --body-bg: #fff8f0;            /* Мягкий тёплый кремово-белый фон */
+  --body-bg: #fff8f0;
   --card-bg: #ffffff;
-  --card-inner: #fff3e6;        /* Нежный абрикосовый оттенок внутренних карточек */
-  --border: #fed7aa;            /* Тонкая тёплая персиковая граница */
-  --text-main: #431407;         /* Глубокий тёплый кофейный текст */
-  --text-sub: #9a3412;          /* Терракотовый приглушённый цвет */
-  --green-btn: #ea580c;         /* Сочный оранжевый для выполненного укола */
-  --green-badge: #f97316;       /* Тёплый янтарно-оранжевый бейдж сброса */
-  --accent-blue: #f59e0b;       /* Золотисто-жёлтый для селекторов доз */
-  --btn-uncompleted-bg: #ffedd5;/* Светло-рыжая плашка кнопки "Сделать" */
+  --card-inner: #fff3e6;
+  --border: #fed7aa;
+  --text-main: #431407;
+  --text-sub: #9a3412;
+  --accent-blue: #f59e0b;
+  --green-btn: #ea580c;
+  --green-badge: #f97316;
+  --btn-uncompleted-bg: #ffedd5;
   --btn-uncompleted-text: #c2410c;
   --btn-uncompleted-border: #fed7aa;
   --add-btn-bg: #fff7ed;
@@ -40,311 +40,55 @@ body.light-theme {
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  -webkit-tap-highlight-color: transparent;
 }
 
-body {
-  background-color: var(--body-bg);
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--body-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--text-main);
-  display: flex;
-  justify-content: center;
-  padding: 12px;
-  transition: background-color 0.2s, color 0.2s;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .screen {
   width: 100%;
-  max-width: 440px;
-  background-color: var(--bg);
-  border-radius: 28px;
-  border: 1px solid var(--border);
-  padding: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  box-shadow: var(--shadow);
-  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 135px) 16px;
+  gap: 16px;
 }
 
+/* Шапка приложения */
 .top-nav {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: 0 4px;
+  width: 100%;
+  flex-shrink: 0;
 }
 
-.app-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.theme-toggle-btn {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--text-main);
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.stats-bar {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.2fr;
-  padding: 8px 12px;
-  align-items: center;
-  border: 1px solid var(--border);
-}
-
-.stat-cell {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-title {
-  font-size: 0.65rem;
-  color: var(--text-sub);
-}
-
-.stat-val {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin-top: 2px;
-}
-
-.stat-cell.highlight {
-  background-color: var(--green-badge);
-  border-radius: 8px;
-  padding: 6px 8px;
-  text-align: center;
-  align-items: center;
-  transition: background-color 0.2s;
-}
-
-.stat-cell.highlight .stat-title {
-  color: #f0fdf4;
-}
-
-.stat-cell.highlight .stat-val {
-  color: #ffffff;
-}
-
-/* Красный бейдж при наборе веса */
-.stat-cell.highlight.danger {
-  background-color: #dc2626;
-}
-
-.stat-cell.highlight.danger .stat-title {
-  color: #fee2e2;
-}
-
-.chart-box {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  padding: 10px 8px;
-  height: 160px;
-  position: relative;
-}
-
-.entry-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 480px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.entry-list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.entry-list::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-
-.entry-row {
-  background-color: var(--card-bg);
-  border-radius: 10px;
-  padding: 10px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.entry-row.pending {
-  background-color: var(--card-inner);
-}
-
-.left-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.action-btn {
-  background-color: var(--green-btn);
-  color: #fff;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-}
-
-.action-btn.uncompleted {
-  background-color: var(--btn-uncompleted-bg);
-  color: var(--btn-uncompleted-text);
-  border: 1px solid var(--btn-uncompleted-border);
-}
-
-.entry-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.entry-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.dose-select {
-  background: transparent;
-  border: none;
-  color: var(--accent-blue);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  outline: none;
-  padding: 0;
-  margin-top: 2px;
-}
-
-.dose-select option {
-  background: var(--card-bg);
-  color: var(--text-main);
-}
-
-.right-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.weight-wrap {
-  display: flex;
-  align-items: center;
-}
-
-.weight-val-input::-webkit-outer-spin-button,
-.weight-val-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.weight-val-input {
-  -moz-appearance: textfield;
-  background: transparent;
-  border: none;
-  color: var(--text-main);
-  font-size: 0.95rem;
-  font-weight: 600;
-  width: 58px;
-  text-align: right;
-  outline: none;
-  color-scheme: dark;
-}
-
-body.light-theme .weight-val-input {
-  color-scheme: light;
-}
-
-.weight-val-input:focus {
-  color: var(--accent-blue);
-}
-
-.weight-unit {
-  font-size: 0.8rem;
-  color: var(--text-sub);
-  margin-left: 2px;
-}
-
-.btn-del {
-  background: transparent;
-  border: none;
-  color: var(--text-sub);
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 2px 4px;
-  opacity: 0.4;
-  transition: opacity 0.2s;
-}
-
-.btn-del:hover {
-  opacity: 1;
-}
-
-.actions-footer {
-  display: flex;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.btn-secondary {
-  flex: 1;
-  background-color: var(--card-bg);
-  border: 1px solid var(--border);
-  color: var(--text-main);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-}
-
-.btn-secondary.add-btn {
-  background-color: var(--add-btn-bg);
-  border-color: var(--add-btn-border);
-  color: var(--add-btn-text);
-}
-
-/* Адаптивные цвета логотипа под темы */
 .app-logo {
   flex-shrink: 0;
-  transition: transform 0.2s ease;
 }
 
-/* Цвета для темной темы (по умолчанию) */
 .logo-bg {
-  fill: #0e1726;
-  stroke: #1e293b;
-  stroke-width: 4px;
+  fill: #162a3f;
+  stroke: #0284c7;
+  stroke-width: 8;
 }
+
 .logo-strokes {
   stroke: #38bdf8;
 }
 
-/* Перекраска векторного логотипа в светлой теме */
 body.light-theme .logo-bg {
   fill: #ffedd5;
   stroke: #fdba74;
@@ -354,36 +98,160 @@ body.light-theme .logo-strokes {
   stroke: #ea580c;
 }
 
-/* Аккуратная кликабельная дата без аляповатых иконок */
-.date-edit-label {
-  display: inline-flex;
+.app-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.theme-toggle-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
   align-items: center;
-  position: relative;
+  justify-content: center;
   cursor: pointer;
-  color: var(--text-sub);
-  border-bottom: 1px dashed var(--text-sub);
-  transition: color 0.15s, border-color 0.15s;
+  font-size: 1.1rem;
+  transition: transform 0.1s ease;
 }
 
-.date-edit-label:hover {
-  color: var(--accent-blue);
-  border-color: var(--accent-blue);
+.theme-toggle-btn:active {
+  transform: scale(0.92);
 }
 
-.hidden-date-input {
-  position: absolute;
-  top: 0;
-  left: 0;
+/* Панель статистики веса */
+.stats-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 8px;
   width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
+  flex-shrink: 0;
 }
 
-/* Контейнер интерактивной даты */
+.stat-cell {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stat-cell.highlight {
+  background: var(--green-badge);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.stat-cell.highlight.danger {
+  background: #dc2626;
+}
+
+.stat-title {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  margin-bottom: 2px;
+}
+
+.stat-cell.highlight .stat-title {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.stat-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* Блок графика */
+.chart-box {
+  width: 100%;
+  height: 160px;
+  flex-shrink: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px 10px;
+  box-sizing: border-box;
+}
+
+/* Список недель */
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.entry-row {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
+  transition: opacity 0.2s ease;
+}
+
+.entry-row.pending {
+  opacity: 0.88;
+}
+
+.left-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.action-btn {
+  min-width: 90px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: none;
+  background: var(--green-btn);
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.action-btn:active {
+  transform: scale(0.96);
+}
+
+.action-btn.uncompleted {
+  background: var(--btn-uncompleted-bg);
+  color: var(--btn-uncompleted-text);
+  border: 1px solid var(--btn-uncompleted-border);
+}
+
+.entry-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.entry-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .date-edit-wrapper {
-  position: relative;
-  display: inline-block;
   cursor: pointer;
 }
 
@@ -398,29 +266,153 @@ body.light-theme .logo-strokes {
   border-color: var(--accent-blue);
 }
 
-/* Прозрачный input поверх текста + тёмная тема для системного календаря */
-.native-date-overlay {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
+.dose-select {
+  background: transparent;
+  border: none;
+  color: var(--accent-blue);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0;
+  margin-top: 4px;
   cursor: pointer;
-  color-scheme: dark; /* Делает выпадающий календарь темно-серым */
+  outline: none;
+  width: fit-content;
 }
 
-/* На светлой теме календарь будет светлым */
-body.light-theme .native-date-overlay {
-  color-scheme: light;
+.right-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-/* Всплывающее окно в нативном стиле */
+.weight-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.weight-val-input {
+  width: 52px;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: right;
+  outline: none;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+
+.weight-val-input::-webkit-outer-spin-button,
+.weight-val-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.weight-unit {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+.btn-del {
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 4px 6px;
+  line-height: 1;
+  opacity: 0.45;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.btn-del:hover {
+  opacity: 1;
+  color: #ef4444;
+}
+
+/* Фиксированная нижняя панель */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 12px) 16px;
+  background: rgba(11, 17, 24, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+body.light-theme .bottom-bar {
+  background: rgba(255, 248, 240, 0.92);
+  border-top: 1px solid var(--border);
+}
+
+.btn-secondary {
+  background: var(--card-inner);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.btn-secondary.add-btn {
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+  background: var(--add-btn-bg);
+  border: 1px dashed var(--add-btn-border);
+  color: var(--add-btn-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-secondary.add-btn:active {
+  transform: scale(0.99);
+}
+
+.actions-footer {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+}
+
+.actions-footer .btn-secondary {
+  flex: 1;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Модальное окно выбора даты */
 .custom-modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   z-index: 9999;
@@ -440,7 +432,7 @@ body.light-theme .native-date-overlay {
   padding: 22px 18px;
   width: 100%;
   max-width: 320px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -454,10 +446,10 @@ body.light-theme .native-date-overlay {
 }
 
 .modal-sub {
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   color: var(--text-sub);
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .modal-date-field {
@@ -471,6 +463,7 @@ body.light-theme .native-date-overlay {
   width: 100%;
   outline: none;
   text-align: center;
+  color-scheme: dark;
 }
 
 body.light-theme .modal-date-field {
@@ -485,13 +478,13 @@ body.light-theme .modal-date-field {
 
 .modal-btn {
   flex: 1;
-  padding: 10px;
+  padding: 11px 10px;
   border-radius: 10px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s ease;
 }
 
 .modal-btn.cancel {

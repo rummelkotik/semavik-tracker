@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Семавик Трекер</title>
 
   <!-- Иконка приложения -->
@@ -14,7 +14,7 @@
 </head>
 <body>
   <div class="screen">
-    <!-- Шапка приложения с адаптивным логотипом -->
+    <!-- Шапка приложения с векторным логотипом -->
     <div class="top-nav">
       <div style="display: flex; align-items: center; gap: 10px;">
         <svg class="app-logo" viewBox="0 0 512 512" width="32" height="32">
@@ -59,20 +59,20 @@
     <!-- Список недель -->
     <div class="entry-list" id="entryList"></div>
 
-    <!-- Кнопка добавления недели -->
-    <button class="btn-secondary add-btn" onclick="addNewWeek()">+ Добавить следующую неделю</button>
-
-    <!-- Нижняя панель резервного копирования -->
-    <div class="actions-footer">
-      <button class="btn-secondary" onclick="exportData()">Резервная копия</button>
-      <label class="btn-secondary" style="margin: 0;">
-        Импорт
-        <input type="file" accept=".json" onchange="importData(event)" style="display: none;" />
-      </label>
+    <!-- Фиксированная нижняя панель действий -->
+    <div class="bottom-bar">
+      <button class="btn-secondary add-btn" onclick="addNewWeek()">+ Добавить следующую неделю</button>
+      <div class="actions-footer">
+        <button class="btn-secondary" onclick="exportData()">Резервная копия</button>
+        <label class="btn-secondary" style="margin: 0;">
+          Импорт
+          <input type="file" accept=".json" onchange="importData(event)" style="display: none;" />
+        </label>
+      </div>
     </div>
   </div>
 
-  <!-- Всплывающее модальное окно выбора даты старта -->
+  <!-- Всплывающее модальное окно смены даты старта -->
   <div id="dateModal" class="custom-modal-overlay">
     <div class="custom-modal">
       <div class="modal-title">Дата первого укола</div>
