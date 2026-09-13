@@ -314,39 +314,45 @@ body.light-theme .logo-strokes {
 }
 
 /* Минималистичная компактная кнопка отметки */
+/* Фиксированный квадрат 36x36px для обоих состояний */
 .action-btn {
-  height: 34px;
-  min-width: 34px;
-  border-radius: 9px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  max-width: 36px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  padding: 0;
+  box-sizing: border-box;
   transition: all 0.15s ease;
 }
 
+/* Не отмечено: аккуратный контурный чекбокс */
 .action-btn.uncompleted {
-  background: var(--btn-uncompleted-bg);
-  color: var(--btn-uncompleted-text);
-  border: 1px solid var(--btn-uncompleted-border);
-  padding: 0 10px;
+  background: var(--card-inner);
+  border: 1.5px solid var(--border);
 }
 
+.action-btn.uncompleted:hover {
+  border-color: var(--accent-blue);
+}
+
+/* Отмечено: зеленая заливка с галочкой */
 .action-btn.completed {
   background: var(--green-badge);
+  border: 1.5px solid transparent;
   color: #ffffff;
-  min-width: 34px;
-  padding: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
 }
 
 .action-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.9);
 }
 
 .entry-info {
