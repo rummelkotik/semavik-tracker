@@ -27,9 +27,9 @@ function generateInitialSchedule() {
       isoDate: d.toISOString(),
       dateStr: `${formatDate(d)}, ${DAYS[d.getDay()]}`,
       dose: dose,
-      weight: i === 0 ? 127.3 : null,
-      done: i === 0,
-      doneTime: i === 0 ? "12:05 12.09" : null
+      weight: null,        // Теперь всегда null для всех недель
+      done: false,         // Первый укол не отмечен по умолчанию
+      doneTime: null
     });
   }
   return list;
@@ -165,16 +165,29 @@ function addNewWeek() {
 
 function renderStats() {
   const recorded = state.filter(s => s.weight !== null && !isNaN(s.weight));
-  const startW = recorded.length > 0 ? recorded[0].weight : 127.3;
-  const currentW = recorded.length > 0 ? recorded[recorded.length - 1].weight : startW;
-  const diff = parseFloat((currentW - startW).toFixed(1));
-
-  document.getElementById("disp-start").innerText = `${startW} кг`;
-  document.getElementById("disp-current").innerText = `${currentW} кг`;
-
+  
+  const dispStart = document.getElementById("disp-start");
+  const dispCurrent = document.getElementById("disp-current");
+  const valEl = document.getElementById("disp-diff");
   const badgeEl = document.querySelector(".stat-cell.highlight");
   const titleEl = badgeEl.querySelector(".stat-title");
-  const valEl = document.getElementById("disp-diff");
+
+  // Если вес ещё ни разу не заполнили
+  if (recorded.length === 0) {
+    dispStart.innerText = "—";
+    dispCurrent.innerText = "—";
+    valEl.innerText = "—";
+    titleEl.innerText = "Сброшено:";
+    badgeEl.classList.remove("danger");
+    return;
+  }
+
+  const startW = recorded[0].weight;
+  const currentW = recorded[recorded.length - 1].weight;
+  const diff = parseFloat((currentW - startW).toFixed(1));
+
+  dispStart.innerText = `${startW} кг`;
+  dispCurrent.innerText = `${currentW} кг`;
 
   if (diff > 0) {
     badgeEl.classList.add("danger");
