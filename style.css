@@ -313,8 +313,7 @@ body.light-theme .logo-strokes {
   flex: 1;
 }
 
-/* Минималистичная компактная кнопка отметки */
-/* Фиксированный квадрат 36x36px для обоих состояний */
+/* Минималистичная компактная кнопка отметки (квадрат 36x36px) */
 .action-btn {
   width: 36px;
   height: 36px;
@@ -332,7 +331,6 @@ body.light-theme .logo-strokes {
   transition: all 0.15s ease;
 }
 
-/* Не отмечено: аккуратный контурный чекбокс */
 .action-btn.uncompleted {
   background: var(--card-inner);
   border: 1.5px solid var(--border);
@@ -342,7 +340,6 @@ body.light-theme .logo-strokes {
   border-color: var(--accent-blue);
 }
 
-/* Отмечено: зеленая заливка с галочкой */
 .action-btn.completed {
   background: var(--green-badge);
   border: 1.5px solid transparent;
@@ -735,11 +732,13 @@ body.light-theme .search-btn-icon {
   padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 12px) 16px;
   background: rgba(11, 17, 24, 0.88);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 8px;
   z-index: 100;
+  box-sizing: border-box;
 }
 
 body.light-theme .bottom-bar {
@@ -783,16 +782,19 @@ body.light-theme .bottom-bar {
   justify-content: center;
 }
 
+/* Модальные окна с фиксом вылезания на iOS Safari */
 .custom-modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 9999;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .custom-modal-overlay.active {
@@ -803,59 +805,94 @@ body.light-theme .bottom-bar {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 20px 18px;
+  padding: 22px 18px;
   width: 100%;
   max-width: 320px;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  box-sizing: border-box;
 }
 
 .modal-title {
   font-size: 1.05rem;
   font-weight: 700;
   text-align: center;
+  color: var(--text-main);
+  margin: 0;
 }
 
 .modal-sub {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: var(--text-sub);
   text-align: center;
-  line-height: 1.35;
+  line-height: 1.4;
+  margin: 0 4px;
 }
 
+/* Фикс ширины поля даты и текстовых инпутов для iOS */
 .modal-date-field {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 44px;
+  box-sizing: border-box;
   background: var(--card-inner);
   border: 1px solid var(--border);
   color: var(--text-main);
-  padding: 10px 12px;
-  border-radius: 10px;
+  padding: 0 14px;
+  border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 600;
-  width: 100%;
+  text-align: center;
   outline: none;
   color-scheme: dark;
+  margin: 0;
+}
+
+.modal-date-field::-webkit-date-and-time-value {
+  text-align: center;
+  margin: 0;
 }
 
 body.light-theme .modal-date-field {
   color-scheme: light;
 }
 
+.modal-date-field:focus {
+  border-color: var(--accent-blue);
+}
+
 .modal-actions {
   display: flex;
   gap: 10px;
-  margin-top: 6px;
+  width: 100%;
+  margin-top: 4px;
+  box-sizing: border-box;
 }
 
 .modal-btn {
   flex: 1;
-  padding: 11px 10px;
-  border-radius: 10px;
-  font-size: 0.85rem;
+  min-width: 0;
+  height: 42px;
+  border-radius: 11px;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  box-sizing: border-box;
+}
+
+.modal-btn:active {
+  transform: scale(0.96);
 }
 
 .modal-btn.cancel {
