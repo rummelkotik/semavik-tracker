@@ -5,15 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Семавик Трекер</title>
 
+  <!-- Иконка приложения -->
   <link rel="icon" type="image/png" sizes="32x32" href="icon.png" />
   <link rel="apple-touch-icon" href="icon.png" />
 
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Клиентский движок распознавания текста Tesseract OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
   <div class="screen">
-    <!-- Шапка приложения -->
+    <!-- Шапка приложения с векторным логотипом -->
     <div class="top-nav">
       <div style="display: flex; align-items: center; gap: 10px;">
         <svg class="app-logo" viewBox="0 0 512 512" width="32" height="32">
@@ -135,7 +138,7 @@
         </div>
       </div>
 
-      <!-- Блок кнопок добавления: Поиск, Скан КБЖУ камерой, Быстрый ввод -->
+      <!-- Кнопки: Поиск, Скан фото КБЖУ, Ручной ввод -->
       <div class="food-add-trigger-box">
         <button class="btn-primary add-food-btn" onclick="openFoodSearchModal()">
           <svg class="search-btn-icon" viewBox="0 0 24 24" width="16" height="16">
@@ -145,7 +148,6 @@
           <span>Поиск</span>
         </button>
 
-        <!-- Кнопка фото-сканера КБЖУ с камеры телефона -->
         <label class="btn-secondary add-food-scan-label" title="Сфотографировать КБЖУ упаковки">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -164,7 +166,7 @@
             <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-linecap="round"/>
           </svg>
         </div>
-        <span id="aiScanStatus">Сканируем КБЖУ с фото упаковки...</span>
+        <span id="aiScanStatus">Сканируем таблицу КБЖУ...</span>
       </div>
 
       <div class="food-log-list" id="foodLogList"></div>
@@ -183,7 +185,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛКИ -->
+  <!-- МОДАЛЬНЫЕ ОКНА -->
 
   <div id="dateModal" class="custom-modal-overlay">
     <div class="custom-modal">
