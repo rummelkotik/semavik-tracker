@@ -147,13 +147,26 @@ body.light-theme .logo-strokes {
   padding: 8px 10px;
   border-radius: 9px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab-btn .tab-icon {
+  stroke: var(--text-sub);
+  transition: stroke 0.15s ease;
 }
 
 .tab-btn.active {
   background: var(--card-bg);
   color: var(--text-main);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.tab-btn.active .tab-icon {
+  stroke: var(--accent-blue);
 }
 
 /* Контейнеры вкладок */
@@ -561,10 +574,22 @@ body.light-theme .logo-strokes {
   height: 44px;
   cursor: pointer;
   font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.search-btn-icon {
+  stroke: #0b1118;
 }
 
 body.light-theme .btn-primary.add-food-btn {
   color: #ffffff;
+}
+
+body.light-theme .search-btn-icon {
+  stroke: #ffffff;
 }
 
 .add-food-quick-btn {
@@ -877,4 +902,8 @@ body.light-theme .modal-date-field {
 .modal-btn.confirm {
   background: var(--green-badge);
   color: #ffffff;
+}
+
+.tab-icon, .tab-icon * {
+  pointer-events: none;
 }
