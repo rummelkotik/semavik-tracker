@@ -736,6 +736,7 @@ function triggerCameraInput() {
   document.getElementById("cameraFileInput").click();
 }
 
+// ================= ИИ-СКАНЕР GEMINI VISION С ДИНАМИЧЕСКИМ ОПРЕДЕЛЕНИЕМ МОДЕЛИ =================
 async function handleNutritionPhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -752,82 +753,84 @@ async function handleNutritionPhoto(event) {
   status.innerText = "Подготовка фото...";
 
   try {
-    // Сжимаем фото до 1000px для быстрой загрузки
+    // 1. Сжимаем фото на Canvas для быстрой передачи
     const base64DataUrl = await resizeImageToDataUrl(file, 1000, 0.85);
     const base64Clean = base64DataUrl.split(",")[1];
 
-    status.innerText = "ИИ анализирует состав и КБЖУ...";
+    status.innerText = "Поиск доступной ИИ-модели...";
 
-    const promptText = `Проанализируй фото этикетки пищевой ценности (или блюда/продукта).
-Определи и рассчитай КБЖУ на 100 грамм (или на порцию, если это готовое блюдо).
-Верни ответ СТРОГО в формате JSON без каких-либо кавычек или markdown-блоков:
+    // 2. Получаем список моделей, доступных для вашего ключа
+    let chosenModel = "models/gemini-2.0-flash";
+    try {
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      if (listRes.ok) {
+        const listData = await listRes.json();
+        const available = (listData.models || []).filter(m => 
+          m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent")
+        );
+
+        // Ищем оптимальную Flash-модель (2.5 -> 2.0 -> 1.5 -> любая доступная)
+        const flashModel = available.find(m => m.name.includes("flash") && !m.name.includes("preview")) ||
+                           available.find(m => m.name.includes("flash")) ||
+                           available[0];
+
+        if (flashModel && flashModel.name) {
+          chosenModel = flashModel.name;
+        }
+      }
+    } catch (e) {
+      console.warn("Model auto-discovery fallback:", e);
+    }
+
+    status.innerText = "ИИ распознаёт состав и КБЖУ...";
+
+    const promptText = `Внимательно проанализируй фото этикетки пищевой ценности или готового блюда.
+Определи КБЖУ на 100 грамм (или на порцию, если это готовое блюдо).
+Верни ответ СТРОГО в виде JSON объекта без каких-либо кавычек, оформления или markdown-разметки:
 {
-  "name": "краткое название продукта",
-  "cals": число_калорий,
+  "name": "краткое русское название продукта",
+  "cals": целое_число_калорий,
   "prot": число_белков,
   "fat": число_жиров,
   "carb": число_углеводов
 }`;
 
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            { text: promptText },
-            {
-              inline_data: {
-                mime_type: "image/jpeg",
-                data: base64Clean
+    const requestUrl = `https://generativelanguage.googleapis.com/v1beta/${chosenModel}:generateContent?key=${apiKey}`;
+
+    const res = await fetch(requestUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: promptText },
+              {
+                inline_data: {
+                  mime_type: "image/jpeg",
+                  data: base64Clean
+                }
               }
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        response_mime_type: "application/json"
-      }
-    };
+            ]
+          }
+        ]
+      })
+    });
 
-    // Список рабочих моделей с автоматическим фоллбэком
-    const candidateUrls = [
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
-    ];
-
-    let lastError = null;
-    let data = null;
-
-    for (const url of candidateUrls) {
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody)
-        });
-
-        if (res.ok) {
-          data = await res.json();
-          break;
-        } else {
-          const errJson = await res.json().catch(() => ({}));
-          lastError = errJson.error?.message || `HTTP ${res.status}`;
-        }
-      } catch (err) {
-        lastError = err.message;
-      }
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error?.message || `Ошибка сервера (HTTP ${res.status})`);
     }
 
+    const data = await res.json();
     banner.style.display = "none";
 
-    if (!data) {
-      throw new Error(lastError || "Не удалось подключиться к моделям Gemini");
-    }
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    // Очищаем от возможных markdown ```json блоков
+    const cleanJson = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
 
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (replyText) {
-      const parsed = JSON.parse(replyText);
+    if (cleanJson) {
+      const parsed = JSON.parse(cleanJson);
       openQuickAddModal();
       document.getElementById("quickAddName").value = parsed.name || "Продукт с фото";
       document.getElementById("quickAddCals").value = parsed.cals || "";
@@ -835,7 +838,7 @@ async function handleNutritionPhoto(event) {
       document.getElementById("quickAddF").value = parsed.fat || "";
       document.getElementById("quickAddC").value = parsed.carb || "";
     } else {
-      alert("ИИ не смог извлечь данные о калориях с этого фото.");
+      alert("Не удалось распознать пищевую ценность. Попробуйте ещё раз.");
     }
   } catch (err) {
     banner.style.display = "none";
