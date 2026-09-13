@@ -753,7 +753,7 @@ function triggerCameraInput() {
   if (fileInput) fileInput.click();
 }
 
-async function handleNutritionPhoto(event) {
+aasync function handleNutritionPhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
 
@@ -764,23 +764,32 @@ async function handleNutritionPhoto(event) {
   }
 
   const banner = document.getElementById("aiScanLoader");
+  const statusEl = document.getElementById("aiScanStatus");
   if (banner) banner.style.display = "flex";
+  if (statusEl) statusEl.innerText = "Анализирую этикетку (RU / EN)...";
 
   try {
-    const base64DataUrl = await resizeImageToDataUrl(file, 1000, 0.85);
+    // 1600px сохраняет читаемость мелкого текста таблиц
+    const base64DataUrl = await resizeImageToDataUrl(file, 1600, 0.9);
     const base64Clean = base64DataUrl.split(",")[1];
 
-    const promptText = `Внимательно проанализируй фото этикетки или порции блюда.
-Найди таблицу пищевой ценности СТРОГО НА 100 ГРАММ (или 100 мл).
-Также определи номинальный вес/объём упаковки, если он указан.
-Верни ответ СТРОГО в формате JSON без markdown разметки:
+    const promptText = `Analyze this food label or meal photo. It may be in Russian ("Пищевая ценность"), English ("Nutrition Facts"), or Korean ("영양정보", e.g. Buldak).
+
+Rules:
+1. Product name: Russian concise name (e.g. "Лапша Buldak Carbonara", "Творог 5%").
+2. Portion weight (detectedWeight): Total package net weight or serving size in grams. If unknown, use 100.
+3. Values per 100g:
+   - If the label has per 100g/100ml values, take them directly.
+   - If values are only given per serving/package (e.g. 140g packet, 530 kcal), calculate per 100g: (ValuePerServing / ServingWeight) * 100.
+   - For Energy: strictly use kcal (калории), NOT kJ.
+4. Output strictly JSON matching:
 {
-  "name": "краткое русское название",
-  "detectedWeight": число_веса_или_100,
-  "cals100": число_калорий_на_100г,
-  "prot100": число_белков_на_100г,
-  "fat100": число_жиров_на_100г,
-  "carb100": число_углеводов_на_100г
+  "name": "string",
+  "detectedWeight": number,
+  "cals100": number,
+  "prot100": number,
+  "fat100": number,
+  "carb100": number
 }`;
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -793,29 +802,36 @@ async function handleNutritionPhoto(event) {
             { text: promptText },
             { inline_data: { mime_type: "image/jpeg", data: base64Clean } }
           ]
-        }]
+        }],
+        generationConfig: {
+          response_mime_type: "application/json"
+        }
       })
     });
 
     const data = await res.json();
     if (banner) banner.style.display = "none";
 
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const cleanJson = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
-
-    if (cleanJson) {
-      const parsed = JSON.parse(cleanJson);
-      openQuickAddModal({
-        name: parsed.name || "Продукт с фото",
-        detectedWeight: parsed.detectedWeight || 100,
-        cals100: parsed.cals100 || 0,
-        prot100: parsed.prot100 || 0,
-        fat100: parsed.fat100 || 0,
-        carb100: parsed.carb100 || 0
-      });
-    } else {
-      alert("Не удалось распознать данные. Попробуйте сфотографировать этикетку ближе.");
+    if (data.error) {
+      throw new Error(data.error.message || "Ошибка API");
     }
+
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) {
+      throw new Error("Не удалось распознать данные");
+    }
+
+    const parsed = JSON.parse(rawText);
+
+    openQuickAddModal({
+      name: parsed.name || "Продукт с фото",
+      detectedWeight: Number(parsed.detectedWeight) || 100,
+      cals100: Math.round(Number(parsed.cals100)) || 0,
+      prot100: parseFloat(Number(parsed.prot100).toFixed(1)) || 0,
+      fat100: parseFloat(Number(parsed.fat100).toFixed(1)) || 0,
+      carb100: parseFloat(Number(parsed.carb100).toFixed(1)) || 0
+    });
+
   } catch (err) {
     if (banner) banner.style.display = "none";
     alert(`Ошибка сканирования: ${err.message}`);
