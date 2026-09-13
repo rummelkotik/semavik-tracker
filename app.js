@@ -547,13 +547,31 @@ function debounceFoodSearch() {
 
 async function searchOpenFoodFacts(query) {
   try {
-    const res = await fetch(`https://ru.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=12`);
+    // Используем стабильный публичный API v2 с разрешенным CORS и фильтром по русскому языку
+    const url = `https://world.openfoodfacts.org/api/v2/search?categories_tags_en=${encodeURIComponent(query)}&search_terms=${encodeURIComponent(query)}&lc=ru&page_size=15&fields=product_name,product_name_ru,brands,nutriments`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Network response was not ok");
+    
     const data = await res.json();
     document.getElementById("foodSearchLoading").style.display = "none";
     renderSearchResults(data.products || []);
   } catch (err) {
-    document.getElementById("foodSearchLoading").style.display = "none";
-    document.getElementById("searchResultsList").innerHTML = `<div style="color: #ef4444; font-size: 0.8rem; padding: 10px;">Ошибка поиска. Проверьте интернет.</div>`;
+    console.error("Search error:", err);
+    // Запасной фоллбэк на глобальный эндпоинт, если основной дал сбой
+    try {
+      const fallbackUrl = `https://ru.openfoodfacts.net/api/v2/search?search_terms=${encodeURIComponent(query)}&page_size=15&fields=product_name,product_name_ru,brands,nutriments`;
+      const fbRes = await fetch(fallbackUrl);
+      const fbData = await fbRes.json();
+      document.getElementById("foodSearchLoading").style.display = "none";
+      renderSearchResults(fbData.products || []);
+    } catch (fallbackErr) {
+      document.getElementById("foodSearchLoading").style.display = "none";
+      document.getElementById("searchResultsList").innerHTML = `
+        <div style="color: #ef4444; font-size: 0.8rem; padding: 10px; text-align: center;">
+          Не удалось загрузить результаты. Попробуйте другой запрос или добавьте через «+ Быстрый ввод».
+        </div>`;
+    }
   }
 }
 
