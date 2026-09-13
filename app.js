@@ -1,5 +1,53 @@
 const DAYS = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
+// Встроенный справочник продуктов
+const BUILTIN_FOOD_DB = [
+  { name: "Творог 5%", cals: 121, prot: 16.0, fat: 5.0, carb: 3.0 },
+  { name: "Творог 0% (обезжиренный)", cals: 71, prot: 16.5, fat: 0.2, carb: 1.3 },
+  { name: "Творог 9%", cals: 159, prot: 14.0, fat: 9.0, carb: 2.0 },
+  { name: "Яйцо куриное (1 шт ~55г)", cals: 143, prot: 12.7, fat: 10.9, carb: 0.7 },
+  { name: "Яичный белок", cals: 44, prot: 11.1, fat: 0.2, carb: 0.7 },
+  { name: "Молоко 2.5%", cals: 52, prot: 2.8, fat: 2.5, carb: 4.7 },
+  { name: "Молоко 3.2%", cals: 59, prot: 2.9, fat: 3.2, carb: 4.7 },
+  { name: "Йогурт греческий Teos 2%", cals: 66, prot: 8.0, fat: 2.0, carb: 4.2 },
+  { name: "Сыр Российский 45%", cals: 350, prot: 24.0, fat: 28.0, carb: 0.0 },
+  { name: "Сыр Моцарелла", cals: 280, prot: 18.0, fat: 22.0, carb: 2.2 },
+  { name: "Сыр Сулугуни", cals: 285, prot: 19.5, fat: 22.0, carb: 0.0 },
+  { name: "Сыр Пармезан", cals: 392, prot: 35.8, fat: 25.8, carb: 3.2 },
+  { name: "Кефир 1%", cals: 40, prot: 3.0, fat: 1.0, carb: 4.0 },
+  { name: "Кефир 2.5%", cals: 53, prot: 2.9, fat: 2.5, carb: 4.0 },
+  { name: "Сметана 15%", cals: 158, prot: 2.6, fat: 15.0, carb: 3.0 },
+  { name: "Масло сливочное 82.5%", cals: 748, prot: 0.6, fat: 82.5, carb: 0.8 },
+  { name: "Куриное филе (грудка варёная / гриль)", cals: 135, prot: 29.0, fat: 2.0, carb: 0.0 },
+  { name: "Куриное филе сырое", cals: 110, prot: 23.0, fat: 1.2, carb: 0.0 },
+  { name: "Куриное бедро без кожи", cals: 170, prot: 20.0, fat: 10.0, carb: 0.0 },
+  { name: "Индейка (филе грудки)", cals: 115, prot: 24.0, fat: 1.5, carb: 0.0 },
+  { name: "Говядина постная отварная", cals: 180, prot: 26.0, fat: 8.0, carb: 0.0 },
+  { name: "Фарш говяжий нежирный", cals: 215, prot: 20.0, fat: 15.0, carb: 0.0 },
+  { name: "Свинина нежирная вырезка", cals: 190, prot: 21.0, fat: 11.0, carb: 0.0 },
+  { name: "Лосось / Форель запечённая", cals: 206, prot: 20.0, fat: 13.0, carb: 0.0 },
+  { name: "Тунец в собственном соку", cals: 101, prot: 23.5, fat: 0.8, carb: 0.0 },
+  { name: "Минтай / Треска филе", cals: 72, prot: 16.0, fat: 0.8, carb: 0.0 },
+  { name: "Креветки варёные", cals: 95, prot: 20.5, fat: 1.5, carb: 0.0 },
+  { name: "Гречка (крупа сухая)", cals: 310, prot: 12.6, fat: 3.3, carb: 62.0 },
+  { name: "Гречка варёная на воде", cals: 105, prot: 4.2, fat: 1.1, carb: 21.3 },
+  { name: "Овсяные хлопья (Геркулес сухой)", cals: 350, prot: 12.0, fat: 6.0, carb: 62.0 },
+  { name: "Овсяная каша на воде", cals: 88, prot: 3.0, fat: 1.7, carb: 15.0 },
+  { name: "Рис белый (сухой)", cals: 344, prot: 6.7, fat: 0.7, carb: 78.0 },
+  { name: "Рис варёный", cals: 116, prot: 2.5, fat: 0.3, carb: 25.0 },
+  { name: "Макароны тв. сортов (сухие)", cals: 350, prot: 13.0, fat: 1.5, carb: 71.0 },
+  { name: "Макароны отварные", cals: 130, prot: 5.0, fat: 0.6, carb: 26.0 },
+  { name: "Картофель отварной", cals: 82, prot: 2.0, fat: 0.4, carb: 17.5 },
+  { name: "Хлеб цельнозерновой", cals: 215, prot: 9.0, fat: 2.0, carb: 40.0 },
+  { name: "Хлеб бородинский / ржаной", cals: 205, prot: 6.8, fat: 1.3, carb: 40.0 },
+  { name: "Огурцы свежие", cals: 15, prot: 0.8, fat: 0.1, carb: 3.0 },
+  { name: "Помидоры свежие", cals: 20, prot: 0.9, fat: 0.2, carb: 3.9 },
+  { name: "Банан (1 шт ~120г)", cals: 89, prot: 1.5, fat: 0.2, carb: 21.8 },
+  { name: "Яблоко", cals: 52, prot: 0.3, fat: 0.2, carb: 13.8 },
+  { name: "Масло оливковое / растительное", cals: 899, prot: 0.0, fat: 99.9, carb: 0.0 },
+  { name: "Протеин сывороточный (1 скуп ~30г)", cals: 380, prot: 75.0, fat: 4.5, carb: 8.0 }
+];
+
 function formatDate(date) {
   const d = String(date.getDate()).padStart(2, "0");
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -14,10 +62,9 @@ function getTodayIso() {
   return `${year}-${month}-${day}`;
 }
 
-// Генерация стартового плана уколов
 function generateInitialSchedule() {
   const list = [];
-  const baseDate = new Date(); // Начинаем от текущей даты
+  const baseDate = new Date();
 
   for (let i = 0; i < 16; i++) {
     const d = new Date(baseDate);
@@ -41,14 +88,12 @@ function generateInitialSchedule() {
   return list;
 }
 
-// ================= СОСТОЯНИЕ (STATE) =================
 let state = JSON.parse(localStorage.getItem("semavik_life_data_v2")) || generateInitialSchedule();
 let targetWeight = parseFloat(localStorage.getItem("semavik_target_weight")) || null;
 let isLight = localStorage.getItem("semavik_theme") === "light";
 let chartInstance = null;
 
-// Питание
-let foodLog = JSON.parse(localStorage.getItem("semavik_food_log")) || {}; // { "2026-09-13": [ {id, name, grams, cals, p, f, c} ] }
+let foodLog = JSON.parse(localStorage.getItem("semavik_food_log")) || {};
 let foodGoals = JSON.parse(localStorage.getItem("semavik_food_goals")) || {
   cals: 2100,
   p: 140,
@@ -58,11 +103,9 @@ let foodGoals = JSON.parse(localStorage.getItem("semavik_food_goals")) || {
 let selectedFoodDate = getTodayIso();
 let activeTab = "weight";
 
-// Временное хранение выбранного из поиска продукта
 let currentPickedProduct = null;
 let searchDebounceTimeout = null;
 
-// ================= ТЕМЫ И ВКЛАДКИ =================
 function applyTheme() {
   const themeBtn = document.getElementById("themeBtn");
   if (isLight) {
@@ -83,7 +126,6 @@ function toggleTheme() {
 
 function switchTab(tab) {
   activeTab = tab;
-  
   const tabBtnW = document.getElementById("tabBtnWeight");
   const tabBtnF = document.getElementById("tabBtnFood");
   const tabContentW = document.getElementById("tabWeightContent");
@@ -95,19 +137,15 @@ function switchTab(tab) {
   if (tab === "weight") {
     tabBtnW.classList.add("active");
     tabBtnF.classList.remove("active");
-    
     tabContentW.style.display = "flex";
     tabContentF.style.display = "none";
-    
     if (bottomBar) bottomBar.style.display = "flex";
     renderChart();
   } else {
     tabBtnF.classList.add("active");
     tabBtnW.classList.remove("active");
-    
     tabContentF.style.display = "flex";
     tabContentW.style.display = "none";
-    
     if (bottomBar) bottomBar.style.display = "none";
     renderFood();
   }
@@ -125,7 +163,7 @@ function save() {
   render();
 }
 
-// ================= ЛОГИКА ТЕРАПИИ И ВЕСА =================
+// ================= ТЕРАПИЯ И ВЕС =================
 function changeStartDate(newDateStr) {
   if (!newDateStr) return;
   const [year, month, day] = newDateStr.split("-").map(Number);
@@ -306,6 +344,7 @@ function renderChart() {
   const data = points.map(s => s.weight);
 
   const canvas = document.getElementById("weightChart");
+  if (!canvas) return;
   const ctx = canvas.getContext("2d");
   if (chartInstance) chartInstance.destroy();
 
@@ -374,6 +413,7 @@ function renderChart() {
 
 function renderSchedule() {
   const list = document.getElementById("entryList");
+  if (!list) return;
   list.innerHTML = "";
 
   state.forEach((item, idx) => {
@@ -424,7 +464,7 @@ function renderSchedule() {
   });
 }
 
-// ================= ЛОГИКА ПИТАНИЯ И БАЗЫ OPEN FOOD FACTS =================
+// ================= ПИТАНИЕ И ПОИСК =================
 function changeFoodDate(deltaDays) {
   const [y, m, d] = selectedFoodDate.split("-").map(Number);
   const curDate = new Date(y, m - 1, d);
@@ -441,6 +481,8 @@ function changeFoodDate(deltaDays) {
 function renderFood() {
   const today = getTodayIso();
   const labelEl = document.getElementById("foodDateLabel");
+  if (!labelEl) return;
+
   if (selectedFoodDate === today) {
     labelEl.innerText = "Сегодня";
   } else {
@@ -449,7 +491,6 @@ function renderFood() {
     labelEl.innerText = `${formatDate(dateObj)}, ${DAYS[dateObj.getDay()]}`;
   }
 
-  // Цели
   document.getElementById("foodTargetCals").innerText = foodGoals.cals;
   document.getElementById("foodTargetProtein").innerText = `/ ${foodGoals.p}г`;
   document.getElementById("foodTargetFat").innerText = `/ ${foodGoals.f}г`;
@@ -485,7 +526,6 @@ function renderFood() {
   barEl.style.width = `${percent}%`;
   barEl.style.backgroundColor = totalC > foodGoals.cals ? "#dc2626" : "var(--green-badge)";
 
-  // Список съеденного
   const logList = document.getElementById("foodLogList");
   logList.innerHTML = "";
 
@@ -518,7 +558,6 @@ function deleteFoodEntry(idx) {
   renderFood();
 }
 
-// Поиск в Open Food Facts API
 function openFoodSearchModal() {
   document.getElementById("foodSearchModal").classList.add("active");
   document.getElementById("foodSearchQuery").value = "";
@@ -533,75 +572,93 @@ function closeFoodSearchModal() {
 
 function debounceFoodSearch() {
   clearTimeout(searchDebounceTimeout);
-  const q = document.getElementById("foodSearchQuery").value.trim();
+  const q = document.getElementById("foodSearchQuery").value.trim().toLowerCase();
+  const container = document.getElementById("searchResultsList");
+
   if (q.length < 2) {
-    document.getElementById("searchResultsList").innerHTML = "";
+    container.innerHTML = "";
+    document.getElementById("foodSearchLoading").style.display = "none";
     return;
   }
-  document.getElementById("foodSearchLoading").style.display = "inline";
 
-  searchDebounceTimeout = setTimeout(() => {
-    searchOpenFoodFacts(q);
-  }, 400);
+  const localMatches = BUILTIN_FOOD_DB.filter(item => item.name.toLowerCase().includes(q));
+  renderSearchResults(localMatches, q);
 }
 
-async function searchOpenFoodFacts(query) {
-  try {
-    // Используем стабильный публичный API v2 с разрешенным CORS и фильтром по русскому языку
-    const url = `https://world.openfoodfacts.org/api/v2/search?categories_tags_en=${encodeURIComponent(query)}&search_terms=${encodeURIComponent(query)}&lc=ru&page_size=15&fields=product_name,product_name_ru,brands,nutriments`;
-
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Network response was not ok");
-    
-    const data = await res.json();
-    document.getElementById("foodSearchLoading").style.display = "none";
-    renderSearchResults(data.products || []);
-  } catch (err) {
-    console.error("Search error:", err);
-    // Запасной фоллбэк на глобальный эндпоинт, если основной дал сбой
-    try {
-      const fallbackUrl = `https://ru.openfoodfacts.net/api/v2/search?search_terms=${encodeURIComponent(query)}&page_size=15&fields=product_name,product_name_ru,brands,nutriments`;
-      const fbRes = await fetch(fallbackUrl);
-      const fbData = await fbRes.json();
-      document.getElementById("foodSearchLoading").style.display = "none";
-      renderSearchResults(fbData.products || []);
-    } catch (fallbackErr) {
-      document.getElementById("foodSearchLoading").style.display = "none";
-      document.getElementById("searchResultsList").innerHTML = `
-        <div style="color: #ef4444; font-size: 0.8rem; padding: 10px; text-align: center;">
-          Не удалось загрузить результаты. Попробуйте другой запрос или добавьте через «+ Быстрый ввод».
-        </div>`;
-    }
-  }
-}
-
-function renderSearchResults(products) {
+function renderSearchResults(products, currentQuery = "") {
   const container = document.getElementById("searchResultsList");
   container.innerHTML = "";
 
-  if (products.length === 0) {
-    container.innerHTML = `<div style="color: var(--text-sub); font-size: 0.8rem; padding: 10px;">Ничего не найдено</div>`;
-    return;
+  if (products.length > 0) {
+    products.forEach(p => {
+      const item = document.createElement("div");
+      item.className = "search-res-item";
+      item.innerHTML = `
+        <div class="search-res-title">${p.name}</div>
+        <div class="search-res-sub">100г: ${p.cals} ккал | Б:${p.prot}г Ж:${p.fat}г У:${p.carb}г</div>
+      `;
+      item.onclick = () => selectProductFromSearch(p);
+      container.appendChild(item);
+    });
   }
 
-  products.forEach(p => {
-    const name = p.product_name_ru || p.product_name || "Без названия";
-    const brand = p.brands ? `(${p.brands})` : "";
-    const n = p.nutriments || {};
-    const cals = Math.round(n["energy-kcal_100g"] || n["energy-kcal"] || 0);
-    const prot = parseFloat((n.proteins_100g || 0).toFixed(1));
-    const fat = parseFloat((n.fat_100g || 0).toFixed(1));
-    const carb = parseFloat((n.carbohydrates_100g || 0).toFixed(1));
+  const extBtn = document.createElement("div");
+  extBtn.style.textAlign = "center";
+  extBtn.style.padding = "8px";
+  extBtn.innerHTML = `
+    <button class="btn-secondary" style="font-size: 0.78rem; width: 100%; border-style: dashed;" onclick="triggerExternalSearch('${currentQuery}')">
+      🌐 Искать «${currentQuery}» во внешней базе Open Food Facts
+    </button>
+  `;
+  container.appendChild(extBtn);
+}
 
-    const item = document.createElement("div");
-    item.className = "search-res-item";
-    item.innerHTML = `
-      <div class="search-res-title">${name} ${brand}</div>
-      <div class="search-res-sub">100г: ${cals} ккал | Б:${prot} Ж:${fat} У:${carb}</div>
-    `;
-    item.onclick = () => selectProductFromSearch({ name: `${name} ${brand}`.trim(), cals, prot, fat, carb });
-    container.appendChild(item);
-  });
+async function triggerExternalSearch(query) {
+  if (!query) return;
+  const loader = document.getElementById("foodSearchLoading");
+  loader.style.display = "flex";
+
+  try {
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`;
+    const res = await fetch(url);
+    const data = await res.json();
+    loader.style.display = "none";
+
+    const parsed = (data.products || [])
+      .filter(p => p.product_name || p.product_name_ru)
+      .map(p => {
+        const n = p.nutriments || {};
+        return {
+          name: `${p.product_name_ru || p.product_name} ${p.brands ? `(${p.brands})` : ""}`.trim(),
+          cals: Math.round(n["energy-kcal_100g"] || n["energy-kcal"] || 0),
+          prot: parseFloat((n.proteins_100g || 0).toFixed(1)),
+          fat: parseFloat((n.fat_100g || 0).toFixed(1)),
+          carb: parseFloat((n.carbohydrates_100g || 0).toFixed(1))
+        };
+      })
+      .filter(p => p.cals > 0);
+
+    if (parsed.length === 0) {
+      alert("Во внешней базе тоже ничего точного не нашлось. Добавьте продукт через «+ Быстрый ввод»!");
+      return;
+    }
+
+    const container = document.getElementById("searchResultsList");
+    container.innerHTML = "";
+    parsed.forEach(p => {
+      const item = document.createElement("div");
+      item.className = "search-res-item";
+      item.innerHTML = `
+        <div class="search-res-title">${p.name}</div>
+        <div class="search-res-sub">100г: ${p.cals} ккал | Б:${p.prot}г Ж:${p.fat}г У:${p.carb}г</div>
+      `;
+      item.onclick = () => selectProductFromSearch(p);
+      container.appendChild(item);
+    });
+  } catch (e) {
+    loader.style.display = "none";
+    alert("Ошибка соединения с внешней базой. Воспользуйтесь быстрым вводом.");
+  }
 }
 
 function selectProductFromSearch(prod) {
@@ -648,7 +705,92 @@ function addSelectedProductToLog() {
   renderFood();
 }
 
-// Быстрый ввод
+// ================= ФОТО-СКАНЕР КБЖУ С УПАКОВКИ =================
+async function handleNutritionPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const banner = document.getElementById("aiScanLoader");
+  const status = document.getElementById("aiScanStatus");
+  banner.style.display = "flex";
+  status.innerText = "Анализируем фото упаковки...";
+
+  try {
+    const base64 = await fileToBase64(file);
+
+    // Запрос к бесплатному оптическому распознаванию текста (OCR Space Engine с русским языком)
+    const formData = new FormData();
+    formData.append("base64Image", base64);
+    formData.append("language", "rus");
+    formData.append("isOverlayRequired", "false");
+    formData.append("OCREngine", "2");
+
+    const res = await fetch("https://api.ocr.space/parse/image", {
+      method: "POST",
+      headers: { apikey: "K87899142388957" }, // открытый публичный бесплатный OCR ключ
+      body: formData
+    });
+
+    const data = await res.json();
+    banner.style.display = "none";
+
+    if (data.ParsedResults && data.ParsedResults[0] && data.ParsedResults[0].ParsedText) {
+      const fullText = data.ParsedResults[0].ParsedText;
+      parseNutritionTextAndOpen(fullText);
+    } else {
+      alert("Не удалось разобрать текст на фото. Попробуйте сфотографировать таблицу чётче и ближе.");
+    }
+  } catch (err) {
+    banner.style.display = "none";
+    console.error("Photo scan error:", err);
+    alert("Ошибка сканирования фото. Введите данные через кнопку «+ Ввод».");
+  }
+
+  event.target.value = "";
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Извлечение калорий, белков, жиров и углеводов из текста фото регулярками
+function parseNutritionTextAndOpen(text) {
+  const lower = text.toLowerCase().replace(/,/g, ".");
+
+  // Поиск калорий (ккал / kcal)
+  const calMatch = lower.match(/(\d+[\.,]?\d*)\s*(ккал|ккап|kcal)/i) || lower.match(/(калори[йность]*|энерг[а-я]*)\D*(\d+[\.,]?\d*)/i);
+  let cals = 0;
+  if (calMatch) {
+    cals = Math.round(parseFloat(calMatch[1] || calMatch[2]));
+  }
+
+  // Белки
+  const pMatch = lower.match(/белк[а-я]*\D*(\d+[\.,]?\d*)/i);
+  const p = pMatch ? parseFloat(pMatch[1]) : 0;
+
+  // Жиры
+  const fMatch = lower.match(/жир[а-я]*\D*(\d+[\.,]?\d*)/i);
+  const f = fMatch ? parseFloat(fMatch[1]) : 0;
+
+  // Углеводы
+  const cMatch = lower.match(/углев[а-я]*\D*(\d+[\.,]?\d*)/i);
+  const c = cMatch ? parseFloat(cMatch[1]) : 0;
+
+  // Предзаполняем модалку продукта
+  openQuickAddModal();
+  document.getElementById("quickAddName").value = "Продукт с упаковки";
+  if (cals > 0) document.getElementById("quickAddCals").value = cals;
+  if (p > 0) document.getElementById("quickAddP").value = p;
+  if (f > 0) document.getElementById("quickAddF").value = f;
+  if (c > 0) document.getElementById("quickAddC").value = c;
+}
+
+// ================= БЫСТРЫЙ ВВОД =================
 function openQuickAddModal() {
   document.getElementById("quickAddModal").classList.add("active");
   document.getElementById("quickAddName").value = "";
@@ -686,7 +828,6 @@ function applyQuickAdd() {
   renderFood();
 }
 
-// Настройка суточных норм
 function openCalGoalModal() {
   document.getElementById("calGoalModal").classList.add("active");
   document.getElementById("goalInputCals").value = foodGoals.cals;
@@ -710,7 +851,6 @@ function applyCalGoals() {
   renderFood();
 }
 
-// Экспорт / Импорт
 function exportData() {
   const exportPayload = {
     version: 3,

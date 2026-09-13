@@ -68,7 +68,6 @@ html, body {
   gap: 14px;
 }
 
-/* Шапка приложения */
 .top-nav {
   display: flex;
   align-items: center;
@@ -125,7 +124,6 @@ body.light-theme .logo-strokes {
   transform: scale(0.92);
 }
 
-/* Переключатель вкладок */
 .tab-switch {
   display: flex;
   background: var(--card-inner);
@@ -154,6 +152,10 @@ body.light-theme .logo-strokes {
   transition: background 0.15s ease, color 0.15s ease;
 }
 
+.tab-icon, .tab-icon * {
+  pointer-events: none;
+}
+
 .tab-btn .tab-icon {
   stroke: var(--text-sub);
   transition: stroke 0.15s ease;
@@ -169,7 +171,6 @@ body.light-theme .logo-strokes {
   stroke: var(--accent-blue);
 }
 
-/* Контейнеры вкладок */
 .tab-content {
   display: none;
   flex-direction: column;
@@ -181,7 +182,6 @@ body.light-theme .logo-strokes {
   display: flex;
 }
 
-/* Панель статистики веса */
 .stats-wrapper {
   display: flex;
   flex-direction: column;
@@ -246,7 +246,6 @@ body.light-theme .logo-strokes {
   text-overflow: ellipsis;
 }
 
-/* Прогресс-бар веса */
 .target-progress-container {
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -280,7 +279,6 @@ body.light-theme .logo-strokes {
   transition: width 0.4s ease;
 }
 
-/* График */
 .chart-box {
   width: 100%;
   height: 160px;
@@ -292,7 +290,6 @@ body.light-theme .logo-strokes {
   box-sizing: border-box;
 }
 
-/* Список недель */
 .entry-list {
   display: flex;
   flex-direction: column;
@@ -561,7 +558,8 @@ body.light-theme .logo-strokes {
 
 .food-add-trigger-box {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  align-items: center;
 }
 
 .btn-primary.add-food-btn {
@@ -592,12 +590,56 @@ body.light-theme .search-btn-icon {
   stroke: #ffffff;
 }
 
-.add-food-quick-btn {
-  flex: 1;
+.add-food-scan-label {
+  width: 44px;
   height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent-blue);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.add-food-scan-label:active {
+  transform: scale(0.95);
+}
+
+.add-food-quick-btn {
+  flex: 1.2;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Плашка сканирования фото */
+.ai-scan-banner {
+  background: var(--card-bg);
+  border: 1px solid var(--accent-blue);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--accent-blue);
+}
+
+.search-loader-static {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spin {
+  animation: spinAnim 0.8s linear infinite;
+}
+
+@keyframes spinAnim {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .food-log-list {
@@ -643,7 +685,7 @@ body.light-theme .search-btn-icon {
   font-weight: 700;
 }
 
-/* ================= ПОИСК OPEN FOOD FACTS ================= */
+/* ================= МОДАЛКИ ================= */
 .food-search-modal {
   max-width: 380px !important;
   max-height: 85vh;
@@ -657,7 +699,16 @@ body.light-theme .search-btn-icon {
 .search-loader {
   position: absolute;
   right: 12px;
-  top: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--accent-blue);
+  animation: spinAnim 0.8s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .search-results-list {
@@ -740,7 +791,6 @@ body.light-theme .search-btn-icon {
   margin-top: 4px;
 }
 
-/* ================= ФИКСИРОВАННЫЙ НИЗ ================= */
 .bottom-bar {
   position: fixed;
   bottom: 0;
@@ -814,7 +864,6 @@ body.light-theme .bottom-bar {
   justify-content: center;
 }
 
-/* Модальные окна */
 .custom-modal-overlay {
   display: none;
   position: fixed;
@@ -902,8 +951,4 @@ body.light-theme .modal-date-field {
 .modal-btn.confirm {
   background: var(--green-badge);
   color: #ffffff;
-}
-
-.tab-icon, .tab-icon * {
-  pointer-events: none;
 }
