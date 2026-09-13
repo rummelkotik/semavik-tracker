@@ -287,14 +287,52 @@
 
   <div id="quickAddModal" class="custom-modal-overlay">
     <div class="custom-modal">
-      <div class="modal-title">Ввод КБЖУ продукта</div>
-      <input type="text" id="quickAddName" class="modal-date-field" placeholder="Название (например: Сырники)" />
-      <input type="number" id="quickAddCals" class="modal-date-field" placeholder="Калории (ккал) *" />
-      <div style="display: flex; gap: 6px;">
-        <input type="number" id="quickAddP" class="modal-date-field" placeholder="Белки (г)" />
-        <input type="number" id="quickAddF" class="modal-date-field" placeholder="Жиры (г)" />
-        <input type="number" id="quickAddC" class="modal-date-field" placeholder="Углев. (г)" />
+      <div class="modal-title">Добавление продукта</div>
+      
+      <input type="text" id="quickAddName" class="modal-date-field" placeholder="Название продукта" />
+
+      <!-- Главное поле: вес порции -->
+      <div style="background: var(--card-inner); border: 1.5px solid var(--accent-blue); padding: 10px 12px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 0.85rem; font-weight: 700; color: var(--accent-blue);">Сколько съели/выпили:</span>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <input 
+            type="number" 
+            id="quickAddGrams" 
+            class="modal-date-field" 
+            style="width: 85px; text-align: center; font-size: 1.1rem; font-weight: 800; padding: 6px 8px;" 
+            value="100" 
+            placeholder="100" 
+            oninput="recalcQuickAddPortion()" 
+          />
+          <span style="font-size: 0.85rem; color: var(--text-sub); font-weight: 600;">г / мл</span>
+        </div>
       </div>
+
+      <div id="quickAddPer100Hint" style="font-size: 0.72rem; color: var(--text-sub); text-align: right;">
+        на 100г: 0 ккал (Б:0 Ж:0 У:0)
+      </div>
+
+      <!-- Автоматически рассчитанные калории и БЖУ -->
+      <div>
+        <label class="modal-field-label">Итого калорий (рассчитано):</label>
+        <input type="number" id="quickAddCals" class="modal-date-field" style="font-weight: 800; font-size: 1.1rem;" placeholder="0 ккал" />
+      </div>
+
+      <div style="display: flex; gap: 6px;">
+        <div style="flex: 1;">
+          <label class="modal-field-label">Белки</label>
+          <input type="number" id="quickAddP" class="modal-date-field" placeholder="0" />
+        </div>
+        <div style="flex: 1;">
+          <label class="modal-field-label">Жиры</label>
+          <input type="number" id="quickAddF" class="modal-date-field" placeholder="0" />
+        </div>
+        <div style="flex: 1;">
+          <label class="modal-field-label">Углеводы</label>
+          <input type="number" id="quickAddC" class="modal-date-field" placeholder="0" />
+        </div>
+      </div>
+
       <div class="modal-actions">
         <button type="button" class="modal-btn cancel" onclick="closeQuickAddModal()">Отмена</button>
         <button type="button" class="modal-btn confirm" onclick="applyQuickAdd()">Добавить</button>
