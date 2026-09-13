@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Семавик Трекер</title>
+
+  <!-- Иконка приложения -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icon.png" />
+  <link rel="apple-touch-icon" href="icon.png" />
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="screen">
+    <!-- Шапка приложения с адаптивным логотипом -->
+    <div class="top-nav">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg class="app-logo" viewBox="0 0 512 512" width="32" height="32">
+          <rect class="logo-bg" width="512" height="512" rx="112" />
+          <g class="logo-strokes">
+            <path d="M232 135 H280 M256 135 V160 M228 160 H284" stroke-width="12" stroke-linecap="round" fill="none" />
+            <rect x="238" y="160" width="36" height="115" rx="6" fill="none" stroke-width="12" stroke-linejoin="round" />
+            <line x1="248" y1="185" x2="264" y2="185" stroke-width="7" stroke-linecap="round" />
+            <line x1="248" y1="205" x2="264" y2="205" stroke-width="7" stroke-linecap="round" />
+            <line x1="248" y1="225" x2="264" y2="225" stroke-width="7" stroke-linecap="round" />
+            <path d="M246 275 L252 295 V340 M266 275 L260 295" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            <path d="M155 240 C145 320 185 390 260 405 C310 415 365 390 395 340" fill="none" stroke-width="16" stroke-linecap="round" />
+            <path d="M365 330 L398 340 L395 375" fill="none" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
+        </svg>
+        <div class="app-title">Семавик</div>
+      </div>
+      <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Сменить тему">☀️</button>
+    </div>
+
+    <!-- Панель статистики веса -->
+    <div class="stats-bar">
+      <div class="stat-cell">
+        <span class="stat-title">Старт:</span>
+        <span class="stat-val" id="disp-start">—</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-title">Текущий:</span>
+        <span class="stat-val" id="disp-current">—</span>
+      </div>
+      <div class="stat-cell highlight">
+        <span class="stat-title">Сброшено:</span>
+        <span class="stat-val" id="disp-diff">—</span>
+      </div>
+    </div>
+
+    <!-- Блок графика -->
+    <div class="chart-box">
+      <canvas id="weightChart"></canvas>
+    </div>
+
+    <!-- Список недель -->
+    <div class="entry-list" id="entryList"></div>
+
+    <!-- Кнопка добавления недели -->
+    <button class="btn-secondary add-btn" onclick="addNewWeek()">+ Добавить следующую неделю</button>
+
+    <!-- Нижняя панель резервного копирования -->
+    <div class="actions-footer">
+      <button class="btn-secondary" onclick="exportData()">Резервная копия</button>
+      <label class="btn-secondary" style="margin: 0;">
+        Импорт
+        <input type="file" accept=".json" onchange="importData(event)" style="display: none;" />
+      </label>
+    </div>
+  </div>
+
+  <!-- Всплывающее модальное окно выбора даты старта -->
+  <div id="dateModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+      <div class="modal-title">Дата первого укола</div>
+      <div class="modal-sub">Все последующие недели пересчитаются автоматически с шагом в 7 дней</div>
+      <input type="date" id="customDateInput" class="modal-date-field" />
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" onclick="closeDateModal()">Отмена</button>
+        <button type="button" class="modal-btn confirm" onclick="applyCustomDate()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

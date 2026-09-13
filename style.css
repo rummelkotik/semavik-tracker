@@ -1,0 +1,510 @@
+:root {
+  --bg: #121820;
+  --body-bg: #0b0f14;
+  --card-bg: #1a222d;
+  --card-inner: #151d26;
+  --border: #263342;
+  --text-main: #e2e8f0;
+  --text-sub: #7e8e9f;
+  --green-btn: #15803d;
+  --green-badge: #16a34a;
+  --accent-blue: #38bdf8;
+  --btn-uncompleted-bg: #243040;
+  --btn-uncompleted-text: #7e8e9f;
+  --btn-uncompleted-border: transparent;
+  --add-btn-bg: #1e293b;
+  --add-btn-border: #38bdf8;
+  --add-btn-text: #38bdf8;
+  --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+body.light-theme {
+  --bg: #ffffff;
+  --body-bg: #fff8f0;            /* Мягкий тёплый кремово-белый фон */
+  --card-bg: #ffffff;
+  --card-inner: #fff3e6;        /* Нежный абрикосовый оттенок внутренних карточек */
+  --border: #fed7aa;            /* Тонкая тёплая персиковая граница */
+  --text-main: #431407;         /* Глубокий тёплый кофейный текст */
+  --text-sub: #9a3412;          /* Терракотовый приглушённый цвет */
+  --green-btn: #ea580c;         /* Сочный оранжевый для выполненного укола */
+  --green-badge: #f97316;       /* Тёплый янтарно-оранжевый бейдж сброса */
+  --accent-blue: #f59e0b;       /* Золотисто-жёлтый для селекторов доз */
+  --btn-uncompleted-bg: #ffedd5;/* Светло-рыжая плашка кнопки "Сделать" */
+  --btn-uncompleted-text: #c2410c;
+  --btn-uncompleted-border: #fed7aa;
+  --add-btn-bg: #fff7ed;
+  --add-btn-border: #f97316;
+  --add-btn-text: #ea580c;
+  --shadow: 0 12px 30px rgba(234, 88, 12, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--body-bg);
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.screen {
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--bg);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow);
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.app-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.theme-toggle-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.stats-bar {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  padding: 8px 12px;
+  align-items: center;
+  border: 1px solid var(--border);
+}
+
+.stat-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-title {
+  font-size: 0.65rem;
+  color: var(--text-sub);
+}
+
+.stat-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.stat-cell.highlight {
+  background-color: var(--green-badge);
+  border-radius: 8px;
+  padding: 6px 8px;
+  text-align: center;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.stat-cell.highlight .stat-title {
+  color: #f0fdf4;
+}
+
+.stat-cell.highlight .stat-val {
+  color: #ffffff;
+}
+
+/* Красный бейдж при наборе веса */
+.stat-cell.highlight.danger {
+  background-color: #dc2626;
+}
+
+.stat-cell.highlight.danger .stat-title {
+  color: #fee2e2;
+}
+
+.chart-box {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 10px 8px;
+  height: 160px;
+  position: relative;
+}
+
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.entry-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.entry-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.entry-row {
+  background-color: var(--card-bg);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.entry-row.pending {
+  background-color: var(--card-inner);
+}
+
+.left-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-btn {
+  background-color: var(--green-btn);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.action-btn.uncompleted {
+  background-color: var(--btn-uncompleted-bg);
+  color: var(--btn-uncompleted-text);
+  border: 1px solid var(--btn-uncompleted-border);
+}
+
+.entry-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.entry-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.dose-select {
+  background: transparent;
+  border: none;
+  color: var(--accent-blue);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  margin-top: 2px;
+}
+
+.dose-select option {
+  background: var(--card-bg);
+  color: var(--text-main);
+}
+
+.right-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weight-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.weight-val-input::-webkit-outer-spin-button,
+.weight-val-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.weight-val-input {
+  -moz-appearance: textfield;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-weight: 600;
+  width: 58px;
+  text-align: right;
+  outline: none;
+  color-scheme: dark;
+}
+
+body.light-theme .weight-val-input {
+  color-scheme: light;
+}
+
+.weight-val-input:focus {
+  color: var(--accent-blue);
+}
+
+.weight-unit {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  margin-left: 2px;
+}
+
+.btn-del {
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.btn-del:hover {
+  opacity: 1;
+}
+
+.actions-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-secondary {
+  flex: 1;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.btn-secondary.add-btn {
+  background-color: var(--add-btn-bg);
+  border-color: var(--add-btn-border);
+  color: var(--add-btn-text);
+}
+
+/* Адаптивные цвета логотипа под темы */
+.app-logo {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* Цвета для темной темы (по умолчанию) */
+.logo-bg {
+  fill: #0e1726;
+  stroke: #1e293b;
+  stroke-width: 4px;
+}
+.logo-strokes {
+  stroke: #38bdf8;
+}
+
+/* Перекраска векторного логотипа в светлой теме */
+body.light-theme .logo-bg {
+  fill: #ffedd5;
+  stroke: #fdba74;
+}
+
+body.light-theme .logo-strokes {
+  stroke: #ea580c;
+}
+
+/* Аккуратная кликабельная дата без аляповатых иконок */
+.date-edit-label {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  color: var(--text-sub);
+  border-bottom: 1px dashed var(--text-sub);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.date-edit-label:hover {
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.hidden-date-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Контейнер интерактивной даты */
+.date-edit-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.date-display-text {
+  color: var(--text-sub);
+  border-bottom: 1px dashed var(--text-sub);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.date-edit-wrapper:hover .date-display-text {
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+/* Прозрачный input поверх текста + тёмная тема для системного календаря */
+.native-date-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  color-scheme: dark; /* Делает выпадающий календарь темно-серым */
+}
+
+/* На светлой теме календарь будет светлым */
+body.light-theme .native-date-overlay {
+  color-scheme: light;
+}
+
+/* Всплывающее окно в нативном стиле */
+.custom-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.custom-modal-overlay.active {
+  display: flex;
+}
+
+.custom-modal {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px 18px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+}
+
+.modal-sub {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.modal-date-field {
+  background: var(--card-inner);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  width: 100%;
+  outline: none;
+  text-align: center;
+}
+
+body.light-theme .modal-date-field {
+  color-scheme: light;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.modal-btn.cancel {
+  background: var(--card-inner);
+  color: var(--text-sub);
+  border: 1px solid var(--border);
+}
+
+.modal-btn.confirm {
+  background: var(--green-badge);
+  color: #ffffff;
+}
+
+.modal-btn:hover {
+  opacity: 0.9;
+}
