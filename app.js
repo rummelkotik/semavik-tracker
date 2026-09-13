@@ -1,7 +1,8 @@
 const DAYS = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
-// Локальный быстрый справочник базовых продуктов
+// Локальный быстрый справочник базовых продуктов (КБЖУ на 100г)
 const BUILTIN_FOOD_DB = [
+  // Молочка и яйца
   { name: "Творог 5%", cals: 121, prot: 16.0, fat: 5.0, carb: 3.0 },
   { name: "Творог 0% (обезжиренный)", cals: 71, prot: 16.5, fat: 0.2, carb: 1.3 },
   { name: "Творог 9%", cals: 159, prot: 14.0, fat: 9.0, carb: 2.0 },
@@ -18,6 +19,8 @@ const BUILTIN_FOOD_DB = [
   { name: "Кефир 2.5%", cals: 53, prot: 2.9, fat: 2.5, carb: 4.0 },
   { name: "Сметана 15%", cals: 158, prot: 2.6, fat: 15.0, carb: 3.0 },
   { name: "Масло сливочное 82.5%", cals: 748, prot: 0.6, fat: 82.5, carb: 0.8 },
+
+  // Мясо, птица, рыба
   { name: "Куриное филе (грудка варёная / гриль)", cals: 135, prot: 29.0, fat: 2.0, carb: 0.0 },
   { name: "Куриное филе сырое", cals: 110, prot: 23.0, fat: 1.2, carb: 0.0 },
   { name: "Куриное бедро без кожи", cals: 170, prot: 20.0, fat: 10.0, carb: 0.0 },
@@ -29,6 +32,8 @@ const BUILTIN_FOOD_DB = [
   { name: "Тунец в собственном соку", cals: 101, prot: 23.5, fat: 0.8, carb: 0.0 },
   { name: "Минтай / Треска филе", cals: 72, prot: 16.0, fat: 0.8, carb: 0.0 },
   { name: "Креветки варёные", cals: 95, prot: 20.5, fat: 1.5, carb: 0.0 },
+
+  // Крупы, гарниры
   { name: "Гречка (крупа сухая)", cals: 310, prot: 12.6, fat: 3.3, carb: 62.0 },
   { name: "Гречка варёная на воде", cals: 105, prot: 4.2, fat: 1.1, carb: 21.3 },
   { name: "Овсяные хлопья (Геркулес сухой)", cals: 350, prot: 12.0, fat: 6.0, carb: 62.0 },
@@ -40,6 +45,8 @@ const BUILTIN_FOOD_DB = [
   { name: "Картофель отварной", cals: 82, prot: 2.0, fat: 0.4, carb: 17.5 },
   { name: "Хлеб цельнозерновой", cals: 215, prot: 9.0, fat: 2.0, carb: 40.0 },
   { name: "Хлеб бородинский / ржаной", cals: 205, prot: 6.8, fat: 1.3, carb: 40.0 },
+
+  // Овощи и фрукты
   { name: "Огурцы свежие", cals: 15, prot: 0.8, fat: 0.1, carb: 3.0 },
   { name: "Помидоры свежие", cals: 20, prot: 0.9, fat: 0.2, carb: 3.9 },
   { name: "Банан (1 шт ~120г)", cals: 89, prot: 1.5, fat: 0.2, carb: 21.8 },
@@ -88,6 +95,7 @@ function generateInitialSchedule() {
   return list;
 }
 
+// ================= СОСТОЯНИЕ (STATE) =================
 let state = JSON.parse(localStorage.getItem("semavik_life_data_v2")) || generateInitialSchedule();
 let targetWeight = parseFloat(localStorage.getItem("semavik_target_weight")) || null;
 let isLight = localStorage.getItem("semavik_theme") === "light";
@@ -105,15 +113,17 @@ let activeTab = "weight";
 
 let currentPickedProduct = null;
 let searchDebounceTimeout = null;
+let quickAddBase100 = null;
 
+// ================= ТЕМА И ВКЛАДКИ =================
 function applyTheme() {
   const themeBtn = document.getElementById("themeBtn");
   if (isLight) {
     document.body.classList.add("light-theme");
-    themeBtn.innerText = "🌙";
+    if (themeBtn) themeBtn.innerText = "🌙";
   } else {
     document.body.classList.remove("light-theme");
-    themeBtn.innerText = "☀️";
+    if (themeBtn) themeBtn.innerText = "☀️";
   }
 }
 
@@ -736,7 +746,6 @@ function triggerCameraInput() {
   document.getElementById("cameraFileInput").click();
 }
 
-// ================= ИИ-СКАНЕР GEMINI VISION =================
 async function handleNutritionPhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -753,7 +762,7 @@ async function handleNutritionPhoto(event) {
   status.innerText = "Подготовка фото...";
 
   try {
-    // 1. Сжатие фото на Canvas для моментальной отправки
+    // Сжимаем фото до 1000px для быстрой и надежной отправки
     const base64DataUrl = await resizeImageToDataUrl(file, 1000, 0.85);
     const base64Clean = base64DataUrl.split(",")[1];
 
@@ -786,11 +795,11 @@ async function handleNutritionPhoto(event) {
       ]
     };
 
-    // Очередь актуальных моделей (начиная с запрошенной Google gemini-3.6-flash)
+    // Очередь актуальных моделей
     const modelsToTry = [
       "models/gemini-3.6-flash",
-      "models/gemini-2.0-flash",
       "models/gemini-2.5-flash",
+      "models/gemini-2.0-flash",
       "models/gemini-1.5-flash"
     ];
 
@@ -817,7 +826,7 @@ async function handleNutritionPhoto(event) {
         const errMsg = errJson.error?.message || `HTTP ${res.status}`;
         lastError = errMsg;
 
-        // Если Google в тексте ошибки советует конкретную модель — добавляем её в очередь
+        // Если Google API рекомендует модель в тексте ошибки, добавляем её в очередь
         const match = errMsg.match(/use\s+(models\/[\w\.\-]+)/i);
         if (match && match[1] && !modelsToTry.includes(match[1])) {
           modelsToTry.splice(i + 1, 0, match[1]);
@@ -838,12 +847,13 @@ async function handleNutritionPhoto(event) {
 
     if (cleanJson) {
       const parsed = JSON.parse(cleanJson);
-      openQuickAddModal();
-      document.getElementById("quickAddName").value = parsed.name || "Продукт с фото";
-      document.getElementById("quickAddCals").value = parsed.cals || "";
-      document.getElementById("quickAddP").value = parsed.prot || "";
-      document.getElementById("quickAddF").value = parsed.fat || "";
-      document.getElementById("quickAddC").value = parsed.carb || "";
+      openQuickAddModal({
+        name: parsed.name || "Продукт с фото",
+        cals: parsed.cals || 0,
+        prot: parsed.prot || 0,
+        fat: parsed.fat || 0,
+        carb: parsed.carb || 0
+      });
     } else {
       alert("Не удалось извлечь данные о калориях. Попробуйте сделать фото ближе к таблице.");
     }
@@ -888,27 +898,55 @@ function resizeImageToDataUrl(file, maxDimension, quality) {
   });
 }
 
-// ================= БЫСТРЫЙ ВВОД =================
-function openQuickAddModal() {
+// ================= БЫСТРЫЙ ВВОД С АВТОПЕРЕСЧЁТОМ ПОРЦИИ =================
+function openQuickAddModal(baseData = null) {
   document.getElementById("quickAddModal").classList.add("active");
-  document.getElementById("quickAddName").value = "";
-  document.getElementById("quickAddCals").value = "";
-  document.getElementById("quickAddP").value = "";
-  document.getElementById("quickAddF").value = "";
-  document.getElementById("quickAddC").value = "";
+
+  if (baseData) {
+    quickAddBase100 = { ...baseData };
+    document.getElementById("quickAddName").value = baseData.name || "Продукт с фото";
+    document.getElementById("quickAddGrams").value = "100";
+    document.getElementById("quickAddCals").value = baseData.cals || "";
+    document.getElementById("quickAddP").value = baseData.prot || "";
+    document.getElementById("quickAddF").value = baseData.fat || "";
+    document.getElementById("quickAddC").value = baseData.carb || "";
+  } else {
+    quickAddBase100 = null;
+    document.getElementById("quickAddName").value = "";
+    document.getElementById("quickAddGrams").value = "100";
+    document.getElementById("quickAddCals").value = "";
+    document.getElementById("quickAddP").value = "";
+    document.getElementById("quickAddF").value = "";
+    document.getElementById("quickAddC").value = "";
+  }
+}
+
+function recalcQuickAddPortion() {
+  if (!quickAddBase100) return;
+  const grams = parseFloat(document.getElementById("quickAddGrams").value) || 0;
+  const factor = grams / 100;
+
+  document.getElementById("quickAddCals").value = Math.round(quickAddBase100.cals * factor) || "";
+  document.getElementById("quickAddP").value = parseFloat((quickAddBase100.prot * factor).toFixed(1)) || "";
+  document.getElementById("quickAddF").value = parseFloat((quickAddBase100.fat * factor).toFixed(1)) || "";
+  document.getElementById("quickAddC").value = parseFloat((quickAddBase100.carb * factor).toFixed(1)) || "";
 }
 
 function closeQuickAddModal() {
   document.getElementById("quickAddModal").classList.remove("active");
+  quickAddBase100 = null;
 }
 
 function applyQuickAdd() {
   const name = document.getElementById("quickAddName").value.trim() || "Приём пищи";
+  const grams = parseFloat(document.getElementById("quickAddGrams").value) || null;
   const cals = parseFloat(document.getElementById("quickAddCals").value);
+
   if (isNaN(cals) || cals <= 0) {
     alert("Укажите калории");
     return;
   }
+
   const p = parseFloat(document.getElementById("quickAddP").value) || 0;
   const f = parseFloat(document.getElementById("quickAddF").value) || 0;
   const c = parseFloat(document.getElementById("quickAddC").value) || 0;
@@ -917,6 +955,7 @@ function applyQuickAdd() {
   foodLog[selectedFoodDate].push({
     id: Date.now(),
     name,
+    grams,
     cals: Math.round(cals),
     p, f, c
   });
