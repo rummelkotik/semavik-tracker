@@ -35,19 +35,36 @@
       <button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Сменить тему">☀️</button>
     </div>
 
-    <!-- Панель статистики веса -->
-    <div class="stats-bar">
-      <div class="stat-cell">
-        <span class="stat-title">Старт:</span>
-        <span class="stat-val" id="disp-start">—</span>
+    <!-- Панель статистики веса и цели -->
+    <div class="stats-wrapper">
+      <div class="stats-bar">
+        <div class="stat-cell">
+          <span class="stat-title">Старт:</span>
+          <span class="stat-val" id="disp-start">—</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-title">Текущий:</span>
+          <span class="stat-val" id="disp-current">—</span>
+        </div>
+        <div class="stat-cell target-cell" onclick="openTargetModal()" title="Нажмите, чтобы задать цель">
+          <span class="stat-title">Цель:</span>
+          <span class="stat-val" id="disp-target">—</span>
+        </div>
+        <div class="stat-cell highlight">
+          <span class="stat-title" id="disp-diff-title">Сброшено:</span>
+          <span class="stat-val" id="disp-diff">—</span>
+        </div>
       </div>
-      <div class="stat-cell">
-        <span class="stat-title">Текущий:</span>
-        <span class="stat-val" id="disp-current">—</span>
-      </div>
-      <div class="stat-cell highlight">
-        <span class="stat-title">Сброшено:</span>
-        <span class="stat-val" id="disp-diff">—</span>
+
+      <!-- Прогресс-бар пути к цели -->
+      <div class="target-progress-container" id="progressBox" style="display: none;">
+        <div class="target-progress-labels">
+          <span id="progressText">Прогресс к цели: 0%</span>
+          <span id="progressRemaining">Осталось: —</span>
+        </div>
+        <div class="target-progress-track">
+          <div class="target-progress-bar" id="targetProgressBar" style="width: 0%;"></div>
+        </div>
       </div>
     </div>
 
@@ -72,7 +89,7 @@
     </div>
   </div>
 
-  <!-- Всплывающее модальное окно смены даты старта -->
+  <!-- Модальное окно смены даты старта -->
   <div id="dateModal" class="custom-modal-overlay">
     <div class="custom-modal">
       <div class="modal-title">Дата первого укола</div>
@@ -81,6 +98,19 @@
       <div class="modal-actions">
         <button type="button" class="modal-btn cancel" onclick="closeDateModal()">Отмена</button>
         <button type="button" class="modal-btn confirm" onclick="applyCustomDate()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно установки цели -->
+  <div id="targetModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+      <div class="modal-title">Целевой вес</div>
+      <div class="modal-sub">Задайте желаемый вес в кг для расчёта прогресса и отображения на графике</div>
+      <input type="number" step="0.1" id="customTargetInput" class="modal-date-field" placeholder="например: 85" />
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" onclick="closeTargetModal()">Отмена</button>
+        <button type="button" class="modal-btn confirm" onclick="applyCustomTarget()">Сохранить</button>
       </div>
     </div>
   </div>

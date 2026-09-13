@@ -8,7 +8,7 @@ function formatDate(date) {
   return `${d}.${m}`;
 }
 
-// Генерация начальных 16 недель с пустым весом
+// Генерация начальных 16 недель
 function generateInitialSchedule() {
   const list = [];
   const baseDate = new Date(2026, 8, 12); // 12 сентября 2026
@@ -35,8 +35,8 @@ function generateInitialSchedule() {
   return list;
 }
 
-// Переход на ключ _v2 для сброса старого кэша с весом 127.3
 let state = JSON.parse(localStorage.getItem("semavik_life_data_v2")) || generateInitialSchedule();
+let targetWeight = parseFloat(localStorage.getItem("semavik_target_weight")) || null;
 let isLight = localStorage.getItem("semavik_theme") === "light";
 let chartInstance = null;
 
@@ -60,10 +60,15 @@ function toggleTheme() {
 
 function save() {
   localStorage.setItem("semavik_life_data_v2", JSON.stringify(state));
+  if (targetWeight !== null) {
+    localStorage.setItem("semavik_target_weight", targetWeight);
+  } else {
+    localStorage.removeItem("semavik_target_weight");
+  }
   render();
 }
 
-// Смена стартовой даты и пересчёт шага недель
+// Смена стартовой даты
 function changeStartDate(newDateStr) {
   if (!newDateStr) return;
 
@@ -81,7 +86,7 @@ function changeStartDate(newDateStr) {
   save();
 }
 
-// Управление модальным окном выбора даты
+// Модальное окно выбора даты
 function openDateModal() {
   const modal = document.getElementById("dateModal");
   const input = document.getElementById("customDateInput");
@@ -91,8 +96,7 @@ function openDateModal() {
 }
 
 function closeDateModal() {
-  const modal = document.getElementById("dateModal");
-  modal.classList.remove("active");
+  document.getElementById("dateModal").classList.remove("active");
 }
 
 function applyCustomDate() {
@@ -101,6 +105,25 @@ function applyCustomDate() {
     changeStartDate(val);
     closeDateModal();
   }
+}
+
+// Модальное окно установки цели
+function openTargetModal() {
+  const modal = document.getElementById("targetModal");
+  const input = document.getElementById("customTargetInput");
+  input.value = targetWeight !== null ? targetWeight : "";
+  modal.classList.add("active");
+}
+
+function closeTargetModal() {
+  document.getElementById("targetModal").classList.remove("active");
+}
+
+function applyCustomTarget() {
+  const val = document.getElementById("customTargetInput").value;
+  targetWeight = val !== "" && !isNaN(val) ? parseFloat(val) : null;
+  save();
+  closeTargetModal();
 }
 
 function toggleWeek(idx) {
@@ -168,9 +191,18 @@ function renderStats() {
   
   const dispStart = document.getElementById("disp-start");
   const dispCurrent = document.getElementById("disp-current");
+  const dispTarget = document.getElementById("disp-target");
   const valEl = document.getElementById("disp-diff");
   const badgeEl = document.querySelector(".stat-cell.highlight");
-  const titleEl = badgeEl.querySelector(".stat-title");
+  const titleEl = document.getElementById("disp-diff-title");
+
+  const progressBox = document.getElementById("progressBox");
+  const progressText = document.getElementById("progressText");
+  const progressRemaining = document.getElementById("progressRemaining");
+  const progressBar = document.getElementById("targetProgressBar");
+
+  // Отображение цели
+  dispTarget.innerText = targetWeight !== null ? `${targetWeight} кг` : "Задать";
 
   if (recorded.length === 0) {
     dispStart.innerText = "—";
@@ -178,6 +210,7 @@ function renderStats() {
     valEl.innerText = "—";
     titleEl.innerText = "Сброшено:";
     badgeEl.classList.remove("danger");
+    progressBox.style.display = "none";
     return;
   }
 
@@ -196,6 +229,28 @@ function renderStats() {
     badgeEl.classList.remove("danger");
     titleEl.innerText = "Сброшено:";
     valEl.innerText = `${diff} кг`;
+  }
+
+  // Расчёт прогресс-бара, если цель задана
+  if (targetWeight !== null) {
+    progressBox.style.display = "flex";
+    const totalToLose = startW - targetWeight;
+
+    if (totalToLose > 0) {
+      const lostSoFar = startW - currentW;
+      let percent = Math.round((lostSoFar / totalToLose) * 100);
+      percent = Math.max(0, Math.min(100, percent));
+
+      const remaining = parseFloat((currentW - targetWeight).toFixed(1));
+      
+      progressText.innerText = `Прогресс: ${percent}%`;
+      progressRemaining.innerText = remaining > 0 ? `Осталось: ${remaining} кг` : `Цель достигнута! 🎉`;
+      progressBar.style.width = `${percent}%`;
+    } else {
+      progressBox.style.display = "none";
+    }
+  } else {
+    progressBox.style.display = "none";
   }
 }
 
@@ -220,25 +275,44 @@ function renderChart() {
     gradient.addColorStop(1, "rgba(56, 189, 248, 0.0)");
   }
 
+  // Основной датасет реального веса
+  const datasets = [
+    {
+      label: "Вес",
+      data: data,
+      borderColor: lineColor,
+      borderWidth: 2.5,
+      backgroundColor: gradient,
+      fill: true,
+      tension: 0.3,
+      pointBackgroundColor: lineColor,
+      pointBorderColor: isLight ? "#ffffff" : "#121820",
+      pointBorderWidth: 2,
+      pointRadius: 4.5,
+      pointHoverRadius: 6
+    }
+  ];
+
+  // Пунктирная линия цели на графике
+  if (targetWeight !== null && data.length > 0) {
+    const targetLineData = new Array(data.length).fill(targetWeight);
+    datasets.push({
+      label: "Цель",
+      data: targetLineData,
+      borderColor: isLight ? "#dc2626" : "#f43f5e",
+      borderWidth: 1.5,
+      borderDash: [5, 5],
+      pointRadius: 0,
+      fill: false,
+      tension: 0
+    });
+  }
+
   chartInstance = new Chart(ctx, {
     type: "line",
     data: {
       labels: labels,
-      datasets: [
-        {
-          data: data,
-          borderColor: lineColor,
-          borderWidth: 2.5,
-          backgroundColor: gradient,
-          fill: true,
-          tension: 0.3,
-          pointBackgroundColor: lineColor,
-          pointBorderColor: isLight ? "#ffffff" : "#121820",
-          pointBorderWidth: 2,
-          pointRadius: 4.5,
-          pointHoverRadius: 6
-        }
-      ]
+      datasets: datasets
     },
     options: {
       responsive: true,
@@ -251,7 +325,7 @@ function renderChart() {
           bodyColor: "#ffffff",
           displayColors: false,
           callbacks: {
-            label: context => `Вес: ${context.parsed.y} кг`
+            label: context => `${context.dataset.label || "Вес"}: ${context.parsed.y} кг`
           }
         }
       },
@@ -327,7 +401,12 @@ function render() {
 }
 
 function exportData() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const exportPayload = {
+    version: 2,
+    targetWeight: targetWeight,
+    data: state
+  };
+  const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = `semavik-backup-${new Date().toISOString().slice(0, 10)}.json`;
@@ -340,7 +419,13 @@ function importData(e) {
   const reader = new FileReader();
   reader.onload = evt => {
     try {
-      state = JSON.parse(evt.target.result);
+      const parsed = JSON.parse(evt.target.result);
+      if (Array.isArray(parsed)) {
+        state = parsed;
+      } else if (parsed && parsed.data) {
+        state = parsed.data;
+        targetWeight = parsed.targetWeight !== undefined ? parsed.targetWeight : null;
+      }
       save();
     } catch {
       alert("Неверный формат бэкапа");
