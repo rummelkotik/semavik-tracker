@@ -8,7 +8,7 @@ function formatDate(date) {
   return `${d}.${m}`;
 }
 
-// Генерация начальных 16 недель
+// Генерация начальных 16 недель с пустым весом
 function generateInitialSchedule() {
   const list = [];
   const baseDate = new Date(2026, 8, 12); // 12 сентября 2026
@@ -27,15 +27,16 @@ function generateInitialSchedule() {
       isoDate: d.toISOString(),
       dateStr: `${formatDate(d)}, ${DAYS[d.getDay()]}`,
       dose: dose,
-      weight: null,        // Теперь всегда null для всех недель
-      done: false,         // Первый укол не отмечен по умолчанию
+      weight: null,
+      done: false,
       doneTime: null
     });
   }
   return list;
 }
 
-let state = JSON.parse(localStorage.getItem("semavik_life_data")) || generateInitialSchedule();
+// Переход на ключ _v2 для сброса старого кэша с весом 127.3
+let state = JSON.parse(localStorage.getItem("semavik_life_data_v2")) || generateInitialSchedule();
 let isLight = localStorage.getItem("semavik_theme") === "light";
 let chartInstance = null;
 
@@ -58,11 +59,11 @@ function toggleTheme() {
 }
 
 function save() {
-  localStorage.setItem("semavik_life_data", JSON.stringify(state));
+  localStorage.setItem("semavik_life_data_v2", JSON.stringify(state));
   render();
 }
 
-// Смена стартовой даты и автоматический пересчет всей цепочки
+// Смена стартовой даты и пересчёт шага недель
 function changeStartDate(newDateStr) {
   if (!newDateStr) return;
 
@@ -84,7 +85,7 @@ function changeStartDate(newDateStr) {
 function openDateModal() {
   const modal = document.getElementById("dateModal");
   const input = document.getElementById("customDateInput");
-  const current = state[0].isoDate ? state[0].isoDate.slice(0, 10) : "2026-09-12";
+  const current = state[0] && state[0].isoDate ? state[0].isoDate.slice(0, 10) : "2026-09-12";
   input.value = current;
   modal.classList.add("active");
 }
@@ -116,7 +117,7 @@ function toggleWeek(idx) {
 }
 
 function updateWeight(idx, val) {
-  state[idx].weight = val ? parseFloat(val) : null;
+  state[idx].weight = val !== "" && !isNaN(val) ? parseFloat(val) : null;
   save();
 }
 
@@ -136,13 +137,13 @@ function deleteRow(idx) {
 
 function addNewWeek() {
   const lastItem = state[state.length - 1];
-  const lastDate = lastItem ? new Date(lastItem.isoDate) : new Date();
+  const lastDate = lastItem && lastItem.isoDate ? new Date(lastItem.isoDate) : new Date();
 
   const nextDate = new Date(lastDate);
   nextDate.setDate(lastDate.getDate() + 7);
 
   const nextWeekNum = state.length + 1;
-  const nextDose = lastItem ? lastItem.dose : 1.0;
+  const nextDose = lastItem ? lastItem.dose : 0.25;
 
   state.push({
     id: Date.now(),
@@ -158,8 +159,7 @@ function addNewWeek() {
   save();
 
   setTimeout(() => {
-    const list = document.getElementById("entryList");
-    list.scrollTop = list.scrollHeight;
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   }, 50);
 }
 
@@ -172,7 +172,6 @@ function renderStats() {
   const badgeEl = document.querySelector(".stat-cell.highlight");
   const titleEl = badgeEl.querySelector(".stat-title");
 
-  // Если вес ещё ни разу не заполнили
   if (recorded.length === 0) {
     dispStart.innerText = "—";
     dispCurrent.innerText = "—";
@@ -209,103 +208,6 @@ function renderChart() {
   const ctx = canvas.getContext("2d");
   if (chartInstance) chartInstance.destroy();
 
-  const lineColor = isLight ? "#0284c7" : "#38bdf8";
-  const tickColor = isLight ? "#64748b" : "#607282";
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, 140);
-  if (isLight) {
-    gradient.addColorStop(0, "rgba(2, 132, 199, 0.18)");
-    gradient.addColorStop(1, "rgba(2, 132, 199, 0.0)");
-  } else {
-    gradient.addColorStop(0, "rgba(56, 189, 248, 0.28)");
-    gradient.addColorStop(1, "rgba(56, 189, 248, 0.0)");
-  }
-
-  chartInstance = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          data: data,
-          borderColor: lineColor,
-          borderWidth: 2.5,
-          backgroundColor: gradient,
-          fill: true,
-          tension: 0.3,
-          pointBackgroundColor: lineColor,
-          pointBorderColor: isLight ? "#ffffff" : "#121820",
-          pointBorderWidth: 2,
-          pointRadius: 4.5,
-          pointHoverRadius: 6
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: isLight ? "#0f172a" : "#1e293b",
-          titleColor: "#f8fafc",
-          bodyColor: "#f8fafc",
-          displayColors: false,
-          callbacks: {
-            label: context => `Вес: ${context.parsed.y} кг`
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            color: tickColor,
-            font: { size: 9, family: "inherit" }
-          }
-        },
-        y: {
-          display: false
-        }
-      }
-    }
-  });
-}
-
-function renderStats() {
-  const recorded = state.filter(s => s.weight !== null && !isNaN(s.weight));
-  const startW = recorded.length > 0 ? recorded[0].weight : 127.3;
-  const currentW = recorded.length > 0 ? recorded[recorded.length - 1].weight : startW;
-  const diff = parseFloat((currentW - startW).toFixed(1));
-
-  document.getElementById("disp-start").innerText = `${startW} кг`;
-  document.getElementById("disp-current").innerText = `${currentW} кг`;
-
-  const badgeEl = document.querySelector(".stat-cell.highlight");
-  const titleEl = badgeEl.querySelector(".stat-title");
-  const valEl = document.getElementById("disp-diff");
-
-  if (diff > 0) {
-    badgeEl.classList.add("danger");
-    titleEl.innerText = "Набрано:";
-    valEl.innerText = `+${diff} кг`;
-  } else {
-    badgeEl.classList.remove("danger");
-    titleEl.innerText = "Сброшено:";
-    valEl.innerText = `${diff} кг`;
-  }
-}
-
-function renderChart() {
-  const points = state.filter(s => s.weight !== null && !isNaN(s.weight));
-  const labels = points.map(s => `Н${s.week} (${s.weight})`);
-  const data = points.map(s => s.weight);
-
-  const canvas = document.getElementById("weightChart");
-  const ctx = canvas.getContext("2d");
-  if (chartInstance) chartInstance.destroy();
-
-  // Оранжево-коралловый акцент для светлой темы, неоновый циан для тёмной
   const lineColor = isLight ? "#ea580c" : "#38bdf8";
   const tickColor = isLight ? "#9a3412" : "#607282";
 
@@ -384,7 +286,6 @@ function render() {
       ? `<button class="action-btn" onclick="toggleWeek(${idx})">✓ ${item.doneTime || "Сделано"}</button>`
       : `<button class="action-btn uncompleted" onclick="toggleWeek(${idx})">Сделать</button>`;
 
-    // Клик по дате первой недели открывает модальное окно
     const labelHtml =
       idx === 0
         ? `Неделя 1 <span class="date-edit-wrapper" onclick="openDateModal()" title="Нажмите, чтобы изменить дату старта">
