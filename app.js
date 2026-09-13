@@ -1,6 +1,6 @@
 const DAYS = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
-// Локальный быстрый справочник базовых продуктов (КБЖУ на 100г)
+// Локальный справочник базовых продуктов (КБЖУ на 100г)
 const BUILTIN_FOOD_DB = [
   // Молочка и яйца
   { name: "Творог 5%", cals: 121, prot: 16.0, fat: 5.0, carb: 3.0 },
@@ -547,10 +547,14 @@ function renderFood() {
   dayEntries.forEach((item, idx) => {
     const row = document.createElement("div");
     row.className = "food-item-row";
+
+    // Отображение веса порции
+    const weightBadge = (item.grams && !isNaN(item.grams)) ? `${item.grams} г/мл • ` : "";
+
     row.innerHTML = `
       <div class="food-item-info">
         <span class="food-item-name">${item.name}</span>
-        <span class="food-item-sub">${item.grams ? item.grams + "г • " : ""}Б: ${item.p}г | Ж: ${item.f}г | У: ${item.c}г</span>
+        <span class="food-item-sub">${weightBadge}Б: ${item.p}г | Ж: ${item.f}г | У: ${item.c}г</span>
       </div>
       <div class="food-item-right">
         <span class="food-item-cals">${item.cals} ккал</span>
@@ -762,21 +766,22 @@ async function handleNutritionPhoto(event) {
   status.innerText = "Подготовка фото...";
 
   try {
-    // Сжимаем фото до 1000px для быстрой и надежной отправки
     const base64DataUrl = await resizeImageToDataUrl(file, 1000, 0.85);
     const base64Clean = base64DataUrl.split(",")[1];
 
-    status.innerText = "ИИ анализирует состав и КБЖУ...";
+    status.innerText = "ИИ анализирует состав, КБЖУ и объём...";
 
     const promptText = `Внимательно проанализируй фото этикетки пищевой ценности или готового блюда.
-Определи КБЖУ на 100 грамм (или на порцию, если это готовое блюдо).
-Верни ответ СТРОГО в виде JSON объекта без каких-либо кавычек, оформления или markdown-разметки:
+1. Найди пищевую ценность (калории и БЖУ) строго на 100 грамм / 100 мл.
+2. Найди на упаковке общий вес нетто или объём (например: 330, 500, 250, 180). Если вес нигде не указан, поставь 100.
+Верни ответ СТРОГО в виде JSON объекта без каких-либо кавычек, текста или markdown:
 {
   "name": "краткое русское название продукта",
-  "cals": целое_число_калорий,
-  "prot": число_белков,
-  "fat": число_жиров,
-  "carb": число_углеводов
+  "grams": число_грамм_или_мл,
+  "cals": число_калорий_на_100г,
+  "prot": число_белков_на_100г,
+  "fat": число_жиров_на_100г,
+  "carb": число_углеводов_на_100г
 }`;
 
     const requestBody = {
@@ -795,11 +800,10 @@ async function handleNutritionPhoto(event) {
       ]
     };
 
-    // Очередь актуальных моделей
     const modelsToTry = [
-      "models/gemini-3.6-flash",
       "models/gemini-2.5-flash",
       "models/gemini-2.0-flash",
+      "models/gemini-3.6-flash",
       "models/gemini-1.5-flash"
     ];
 
@@ -826,7 +830,6 @@ async function handleNutritionPhoto(event) {
         const errMsg = errJson.error?.message || `HTTP ${res.status}`;
         lastError = errMsg;
 
-        // Если Google API рекомендует модель в тексте ошибки, добавляем её в очередь
         const match = errMsg.match(/use\s+(models\/[\w\.\-]+)/i);
         if (match && match[1] && !modelsToTry.includes(match[1])) {
           modelsToTry.splice(i + 1, 0, match[1]);
@@ -849,6 +852,7 @@ async function handleNutritionPhoto(event) {
       const parsed = JSON.parse(cleanJson);
       openQuickAddModal({
         name: parsed.name || "Продукт с фото",
+        grams: parsed.grams || 100,
         cals: parsed.cals || 0,
         prot: parsed.prot || 0,
         fat: parsed.fat || 0,
@@ -901,19 +905,32 @@ function resizeImageToDataUrl(file, maxDimension, quality) {
 // ================= БЫСТРЫЙ ВВОД С АВТОПЕРЕСЧЁТОМ ПОРЦИИ =================
 function openQuickAddModal(baseData = null) {
   document.getElementById("quickAddModal").classList.add("active");
+  const gramsEl = document.getElementById("quickAddGrams");
 
   if (baseData) {
-    quickAddBase100 = { ...baseData };
+    const initialGrams = parseFloat(baseData.grams) || 100;
+
+    // Сохраняем исходные значения на 100г
+    quickAddBase100 = {
+      cals: parseFloat(baseData.cals) || 0,
+      prot: parseFloat(baseData.prot) || 0,
+      fat: parseFloat(baseData.fat) || 0,
+      carb: parseFloat(baseData.carb) || 0
+    };
+
     document.getElementById("quickAddName").value = baseData.name || "Продукт с фото";
-    document.getElementById("quickAddGrams").value = "100";
-    document.getElementById("quickAddCals").value = baseData.cals || "";
-    document.getElementById("quickAddP").value = baseData.prot || "";
-    document.getElementById("quickAddF").value = baseData.fat || "";
-    document.getElementById("quickAddC").value = baseData.carb || "";
+    if (gramsEl) gramsEl.value = initialGrams;
+
+    // Сразу пересчитываем под обнаруженный объём упаковки (например, 330мл)
+    const factor = initialGrams / 100;
+    document.getElementById("quickAddCals").value = Math.round(quickAddBase100.cals * factor) || "";
+    document.getElementById("quickAddP").value = parseFloat((quickAddBase100.prot * factor).toFixed(1)) || "";
+    document.getElementById("quickAddF").value = parseFloat((quickAddBase100.fat * factor).toFixed(1)) || "";
+    document.getElementById("quickAddC").value = parseFloat((quickAddBase100.carb * factor).toFixed(1)) || "";
   } else {
     quickAddBase100 = null;
     document.getElementById("quickAddName").value = "";
-    document.getElementById("quickAddGrams").value = "100";
+    if (gramsEl) gramsEl.value = "100";
     document.getElementById("quickAddCals").value = "";
     document.getElementById("quickAddP").value = "";
     document.getElementById("quickAddF").value = "";
@@ -922,10 +939,21 @@ function openQuickAddModal(baseData = null) {
 }
 
 function recalcQuickAddPortion() {
-  if (!quickAddBase100) return;
-  const grams = parseFloat(document.getElementById("quickAddGrams").value) || 0;
-  const factor = grams / 100;
+  const gramsEl = document.getElementById("quickAddGrams");
+  const grams = parseFloat(gramsEl ? gramsEl.value : 100) || 0;
 
+  // Если вводим вручную с нуля
+  if (!quickAddBase100) {
+    quickAddBase100 = {
+      cals: parseFloat(document.getElementById("quickAddCals").value) || 0,
+      prot: parseFloat(document.getElementById("quickAddP").value) || 0,
+      fat: parseFloat(document.getElementById("quickAddF").value) || 0,
+      carb: parseFloat(document.getElementById("quickAddC").value) || 0
+    };
+    return;
+  }
+
+  const factor = grams / 100;
   document.getElementById("quickAddCals").value = Math.round(quickAddBase100.cals * factor) || "";
   document.getElementById("quickAddP").value = parseFloat((quickAddBase100.prot * factor).toFixed(1)) || "";
   document.getElementById("quickAddF").value = parseFloat((quickAddBase100.fat * factor).toFixed(1)) || "";
@@ -938,9 +966,13 @@ function closeQuickAddModal() {
 }
 
 function applyQuickAdd() {
-  const name = document.getElementById("quickAddName").value.trim() || "Приём пищи";
-  const grams = parseFloat(document.getElementById("quickAddGrams").value) || null;
-  const cals = parseFloat(document.getElementById("quickAddCals").value);
+  const nameEl = document.getElementById("quickAddName");
+  const gramsEl = document.getElementById("quickAddGrams");
+  const calsEl = document.getElementById("quickAddCals");
+
+  const name = (nameEl && nameEl.value.trim()) ? nameEl.value.trim() : "Приём пищи";
+  const grams = gramsEl ? (parseFloat(gramsEl.value) || 100) : 100;
+  const cals = parseFloat(calsEl ? calsEl.value : 0);
 
   if (isNaN(cals) || cals <= 0) {
     alert("Укажите калории");
