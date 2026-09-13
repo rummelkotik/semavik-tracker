@@ -752,52 +752,78 @@ async function handleNutritionPhoto(event) {
   status.innerText = "Подготовка фото...";
 
   try {
-    // Сжимаем фото на Canvas до компактных ~1000px для мгновенной отправки
+    // Сжимаем фото до 1000px для быстрой загрузки
     const base64DataUrl = await resizeImageToDataUrl(file, 1000, 0.85);
     const base64Clean = base64DataUrl.split(",")[1];
 
-    status.innerText = "ИИ анализирует фото...";
+    status.innerText = "ИИ анализирует состав и КБЖУ...";
 
-    const promptText = `Проанализируй фото этикетки с пищевой ценностью (или блюда). Извлеки или рассчитай КБЖУ на 100 грамм (или на порцию).
-Верни ответ СТРОГО в формате JSON без markdown форматирования со следующими полями:
+    const promptText = `Проанализируй фото этикетки пищевой ценности (или блюда/продукта).
+Определи и рассчитай КБЖУ на 100 грамм (или на порцию, если это готовое блюдо).
+Верни ответ СТРОГО в формате JSON без каких-либо кавычек или markdown-блоков:
 {
-  "name": "краткое русское название продукта",
-  "cals": целое число калорий (ккал),
-  "prot": белки в граммах (число),
-  "fat": жиры в граммах (число),
-  "carb": углеводы в граммах (число)
+  "name": "краткое название продукта",
+  "cals": число_калорий,
+  "prot": число_белков,
+  "fat": число_жиров,
+  "carb": число_углеводов
 }`;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: promptText },
-              {
-                inline_data: {
-                  mime_type: "image/jpeg",
-                  data: base64Clean
-                }
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: promptText },
+            {
+              inline_data: {
+                mime_type: "image/jpeg",
+                data: base64Clean
               }
-            ]
-          }
-        ],
-        generationConfig: {
-          response_mime_type: "application/json"
+            }
+          ]
         }
-      })
-    });
+      ],
+      generationConfig: {
+        response_mime_type: "application/json"
+      }
+    };
 
-    if (!res.ok) {
-      const errJson = await res.json().catch(() => ({}));
-      throw new Error(errJson.error?.message || "Ошибка API Gemini");
+    // Список рабочих моделей с автоматическим фоллбэком
+    const candidateUrls = [
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
+    ];
+
+    let lastError = null;
+    let data = null;
+
+    for (const url of candidateUrls) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (res.ok) {
+          data = await res.json();
+          break;
+        } else {
+          const errJson = await res.json().catch(() => ({}));
+          lastError = errJson.error?.message || `HTTP ${res.status}`;
+        }
+      } catch (err) {
+        lastError = err.message;
+      }
     }
 
-    const data = await res.json();
     banner.style.display = "none";
+
+    if (!data) {
+      throw new Error(lastError || "Не удалось подключиться к моделям Gemini");
+    }
 
     const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (replyText) {
@@ -809,12 +835,12 @@ async function handleNutritionPhoto(event) {
       document.getElementById("quickAddF").value = parsed.fat || "";
       document.getElementById("quickAddC").value = parsed.carb || "";
     } else {
-      alert("ИИ не смог найти пищевую ценность на этом фото.");
+      alert("ИИ не смог извлечь данные о калориях с этого фото.");
     }
   } catch (err) {
     banner.style.display = "none";
     console.error("Gemini Vision Error:", err);
-    alert(`Ошибка ИИ-сканера: ${err.message}. Проверьте правильность API ключа в настройках.`);
+    alert(`Ошибка ИИ-сканера: ${err.message}`);
   } finally {
     event.target.value = "";
   }
